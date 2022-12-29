@@ -55,8 +55,8 @@ jobs:
           aws s3 sync \
             --acl public-read \
             --region ${{ secrets.AWS_REGION }} \
-            ./dist ${{ secrets.AWS_S3_BUCKET_DEV }} \
-            --recursive
+            ./dist ${{ secrets.AWS_S3_BUCKET_DEV }}
+    
 
       # Invalidate Cloudfront (this action)
       - name: invalidate
