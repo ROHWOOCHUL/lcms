@@ -24,7 +24,7 @@ function App() {
         </button>
         <p>Web for LCMS</p>
       </div>
-      <p className="read-the-docs">LCMS</p>
+      <p className="read-the-docs">LCMS.com</p>
     </div>
   );
 }
