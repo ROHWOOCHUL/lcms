@@ -1,0 +1,22 @@
+# on: push
+# name: Slack Notification
+# jobs:
+#   slackNotification:
+#     name: Slack Notification
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: 8398a7/action-slack@v3
+#         with:
+#           status: custom
+#           fields: workflow,job,commit,repo,ref,author,took
+#           custom_payload: |
+#             {
+#               attachments: [{
+#                 color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+#                 text: `${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR} ${{ job.status }}`,
+#                 }]
+#             }
+#         env:
+#           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+#           if: always() # Pick up events even if the job fails or is canceled.
+#           SLACK_USERNAME: 'hodoolabs'

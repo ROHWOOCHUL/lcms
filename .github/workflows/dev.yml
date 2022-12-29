@@ -1,0 +1,119 @@
+name: master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@master
+      - name: 'Configure AWS credentials'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+#      - name: Cache dependencies
+#        id: cache
+#        uses: actions/cache@v3
+#        with:
+#          path: '**/node_modules'
+#          restore-keys: |
+#            ${{ runner.os }}-node-
+            
+      - name: Cache node modules # node modules 캐싱
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-master-build-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-
+
+      # - name: robots check
+      #   run: |
+      #     cd public
+      #     ls -al
+      #     mv robots-disallow.txt robots.txt
+      #     ls -al
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Build
+        #run: yarn build
+        run: |
+          ls -al
+          yarn run build:dev
+
+      - name: Deploy
+        run: |
+          aws s3 sync \
+            --acl public-read \
+            --region ${{ secrets.AWS_REGION }} \
+            ./dist ${{ secrets.AWS_S3_BUCKET_DEV }}
+
+      # Invalidate Cloudfront (this action)
+      - name: invalidate
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          DISTRIBUTION: ${{ secrets.CF_DISTRIBUTION_ID_DEV }}
+          PATHS: /*
+          AWS_REGION: 'us-east-1'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: checkout dist
+        uses: actions/checkout@master
+        with:
+          ref: master
+          # need at least 2 here so we can get a proper log in next step
+          fetch-depth: 2
+
+      - name: get updated files
+        run: |
+          # allow grep to fail
+          set +e
+          FILES=$(git log --stat="1000" -1 | grep '|' | awk '{print "/"$1}' | grep -e '\.html$')
+          set -e
+          [ -z "$FILES" ] && touch .updated_files && exit 0
+          for file in $FILES; do
+          echo $file
+          # add bare directory to list of updated paths when we see index.html
+          [[ "$file" == *"/index.html" ]] && echo $file | sed -e 's/\/index.html$/\//'
+          done | sort | uniq | tr '\n' ' ' > .updated_files
+      - name: invalidate
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          PATHS_FROM: .updated_files
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DISTRIBUTION: ${{ secrets.CF_DISTRIBUTION_ID_DEV }}
+
+      #   # 배포가 성공한 경우 알립니다.
+      # # Secrets 항목에 슬랙 Webhook URL을 등록해야 합니다.
+      # - name: Slack notification success
+      #   uses: Ilshidur/action-slack@2.1.0
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      #     SLACK_USERNAME: 'hodooschool-bot'
+      #     #SLACK_CHANNEL: 호두스쿨-웹
+      #   with:
+      #     args: '호두스쿨 DEV 홈페이지를 배포했습니다.'
+
+      # # 배포가 실패한 경우 알립니다.
+      # # Secrets 항목에 슬랙 Webhook URL을 등록해야 합니다.
+      # - name: Slack notification failure
+      #   uses: Ilshidur/action-slack@2.1.0
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      #     SLACK_USERNAME: 'hodoochool-bot'
+      #     #SLACK_CHANNEL: 호두스쿨-웹
+      #   with:
+      #     args: '호두스쿨 DEV 홈페이지 배포에 실패했습니다.'
+      #   if: failure()
