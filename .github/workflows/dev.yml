@@ -55,7 +55,7 @@ jobs:
           aws s3 cp \
             --acl public-read \
             --region ${{ secrets.AWS_REGION }} \
-            . ${{ secrets.AWS_S3_BUCKET_DEV }}
+            ./dist ${{ secrets.AWS_S3_BUCKET_DEV }}
 
       # Invalidate Cloudfront (this action)
       - name: invalidate
