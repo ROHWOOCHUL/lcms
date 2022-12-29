@@ -52,10 +52,11 @@ jobs:
 
       - name: Deploy
         run: |
-          aws s3 cp \
+          aws s3 sync \
             --acl public-read \
             --region ${{ secrets.AWS_REGION }} \
-            ./dist ${{ secrets.AWS_S3_BUCKET_DEV }}
+            ./dist ${{ secrets.AWS_S3_BUCKET_DEV }} \
+            --recursive
 
       # Invalidate Cloudfront (this action)
       - name: invalidate
