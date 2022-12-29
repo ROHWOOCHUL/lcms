@@ -71,7 +71,7 @@ jobs:
       - name: checkout dist
         uses: actions/checkout@master
         with:
-          ref: master
+          ref: develop
           # need at least 2 here so we can get a proper log in next step
           fetch-depth: 2
 
