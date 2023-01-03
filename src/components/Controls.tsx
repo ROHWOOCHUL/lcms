@@ -70,15 +70,7 @@ const Controls = (props: Props) => {
     //   },
     // },
     // "enable"
-    localScreenTracks.current = await AgoraRTC.createScreenVideoTrack(
-      {
-        // encoderConfig: {
-        //   width: { min: 640, max: 1920 },
-        //   height: { min: 480, max: 1080 },
-        // },
-      },
-      "enable"
-    );
+    localScreenTracks.current = await AgoraRTC.createScreenVideoTrack({});
 
     // Video 비활성화
     props.user.videoTrack.stop();
