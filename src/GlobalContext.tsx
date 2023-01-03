@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useRef, useState } from "react";
 
-const UserContext = createContext();
-const StartContext = createContext();
-const ClientContext = createContext();
-const LoadingContext = createContext();
+const UserContext = createContext(null);
+const StartContext = createContext(null);
+const ClientContext = createContext(null);
+const LoadingContext = createContext(null);
 
 export const useUsers = (): any => {
   return useContext(UserContext);
