@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "./scripts/pre-build.sh local && vite",
-    "build:dev": "./scripts/pre-build.sh development && tsc && vite build",
-    "build:stg": "./scripts/pre-build.sh staging && tsc && vite build",
-    "build:prd": "./scripts/pre-build.sh production && tsc && vite build",
+    "build:dev": "./scripts/pre-build.sh development  && vite build",
+    "build:stg": "./scripts/pre-build.sh staging  && vite build",
+    "build:prd": "./scripts/pre-build.sh production  && vite build",
     "build": "tsc && vite build"
   },
   "dependencies": {
