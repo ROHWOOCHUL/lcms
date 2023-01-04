@@ -38,15 +38,17 @@ const Controls = (props: Props) => {
         });
       });
     } else if (type === "video") {
-      setUsers((prevUsers: User[]) => {
-        return prevUsers.map((user) => {
-          if (user.uid === id) {
-            user.client && rtc.current.localVideoTrack.setEnabled(!user.video);
-            return { ...user, video: !user.video };
-          }
-          return user;
-        });
-      });
+      // setUsers((prevUsers: User[]) => {
+      //   return prevUsers.map((user) => {
+      //     if (user.uid === id) {
+      //       user.client && rtc.current.localVideoTrack.setEnabled(!user.video);
+      //       return { ...user, video: !user.video };
+      //     }
+      //     return user;
+      //   });
+      // });
+      rtc.current.localVideoTrack._originMediaStreamTrack.enabled =
+        !rtc.current.localVideoTrack._originMediaStreamTrack.enabled;
     }
   };
 
