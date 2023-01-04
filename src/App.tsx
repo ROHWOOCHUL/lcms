@@ -160,16 +160,16 @@ const App = () => {
           });
         });
       } else if (action === "video") {
-        // setUsers((prevUsers) => {
-        //   console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
-        //   return prevUsers.map((user) => {
-        //     if (user.client) {
-        //       client.current.rtc.localVideoTrack.setEnabled(!user.video);
-        //       return { ...user, video: !user.video };
-        //     }
-        //     return user;
-        //   });
-        // });
+        setUsers((prevUsers) => {
+          console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
+          return prevUsers.map((user) => {
+            if (user.client) {
+              client.current.rtc.localVideoTrack.setEnabled(!user.video);
+              return { ...user, video: !user.video };
+            }
+            return user;
+          });
+        });
         console.log(
           client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled,
           !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled

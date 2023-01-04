@@ -48,7 +48,8 @@ const Controls = (props: Props) => {
     str += type === "audio" && props.user.audio ? "on " : "";
     str +=
       type === "video" &&
-      client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled
+      (client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled ||
+        props.user.video)
         ? "on "
         : "";
     client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled;
@@ -121,6 +122,10 @@ const Controls = (props: Props) => {
     }
   };
 
+  useEffect(() => {
+    console.log("rerender");
+  }, [props.user]);
+
   return (
     <div className="controls">
       {
@@ -137,6 +142,11 @@ const Controls = (props: Props) => {
           onClick={() => muteMaster("video")}
         >
           <FaVideo />
+          <span>
+            {client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled
+              ? "on"
+              : "off"}
+          </span>
         </p>
       }
       {props.user.client && (
