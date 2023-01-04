@@ -9,7 +9,6 @@ interface Props {
   action: () => Promise<void>;
 }
 const Videos = (props: Props) => {
-  const vidDiv = useRef(null);
   const users = useUsers()[0];
   return (
     <div id="videos">
@@ -31,12 +30,7 @@ const Videos = (props: Props) => {
                   ></AgoraVideoPlayer>
                   // </div>
                 )} */}
-                <Video
-                  key={user.uid}
-                  user={user}
-                  action={props.action}
-                  vidDiv={vidDiv}
-                />
+                <Video key={user.uid} user={user} action={props.action} />
                 {/* <Controls user={user} action={props.action} vidDiv={vidDiv} /> */}
               </div>
             );
