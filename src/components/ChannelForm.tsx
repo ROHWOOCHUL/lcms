@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAdmin, useLoading, useStart } from "../GlobalContext";
+import { useAdmin, useLoading, useStart, useUsers } from "../GlobalContext";
 
 import Loader from "./Loader";
 
@@ -8,7 +8,7 @@ const ChannelForm = ({
 }: {
   initFunc: (channelName: string, appId: string) => void;
 }) => {
-  const [channelName, setChannelName] = useState("test");
+  const [channelName, setChannelName] = useState("test7200");
   const [appId, setappId] = useState("f964fae738a94dda88c3c54438449f49");
   const [userName, setUsername] = useState("aa");
   const [start, setStart] = useStart();
