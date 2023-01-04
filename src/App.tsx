@@ -1,8 +1,5 @@
-import {
-  AgoraVideoPlayer,
-  createClient,
-  createMicrophoneAndCameraTracks,
-} from "agora-rtc-react";
+import AgoraRTC, { AgoraVideoPlayer } from "agora-rtc-react";
+// import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   GlobalProvider,
   useAdmin,
@@ -16,45 +13,27 @@ import AgoraRTM from "agora-rtm-sdk";
 import ChannelForm from "./components/ChannelForm";
 import Videos from "./components/Videos";
 
-const useMicAndCamera = createMicrophoneAndCameraTracks();
-const useClient = createClient({ mode: "rtc", codec: "vp8" });
+console.log(AgoraRTC);
+// const useClient = createClient({ mode: "rtc", codec: "vp8" });
+// const useMicAndCamera = createMicrophoneAndCameraTracks();
 const App = () => {
   //Store the User Data
   const [users, setUsers] = useUsers();
   //Regulates the start of the video call
   const [start, setStart] = useStart();
-  //Contains the RTC and RTM data
-  // const client = useRef({
-  //   rtc: {
-  //     // For the local client.
-  //     client: null,
-  //     // For the local audio and video tracks.
-  //     localAudioTrack: null,
-  //     localVideoTrack: null,
-  //   },
-  //   rtm: {
-  //     client: null,
-  //     channel: null,
-  //   },
-  // });
   const client = useClientContext();
   //Whether you are the admin or not
   const admin = useAdmin();
   // const { ready, tracks } = useMicAndCamera();
-  const { ready, tracks } = useMicAndCamera();
 
   const init = async (channelName, appId, userName, admin) => {
     try {
-      client.current.rtc.client = useClient();
       // console.log(channelName, appId, userName, admin);
+      client.current.rtc.client = AgoraRTC.createClient({
+        mode: "rtc",
+        codec: "vp8",
+      });
       initClientEvents();
-
-      client.current.rtm.client = AgoraRTM.createInstance(appId);
-      await client.current.rtm.client.login({ uid: userName });
-      client.current.rtm.channel =
-        await client.current.rtm.client.createChannel(channelName);
-      await client.current.rtm.channel.join();
-      initRtmEvents();
 
       let uid = await client.current.rtc.client.join(
         appId,
@@ -62,6 +41,12 @@ const App = () => {
         null,
         null
       );
+      client.current.rtm.client = AgoraRTM.createInstance(appId);
+      await client.current.rtm.client.login({ uid: uid.toString() });
+      client.current.rtm.channel =
+        await client.current.rtm.client.createChannel(channelName);
+      await client.current.rtm.channel.join();
+      initRtmEvents();
       let obj = {};
       obj[`${uid}`] = JSON.stringify({
         uid: uid,
@@ -69,6 +54,10 @@ const App = () => {
         admin: admin,
       });
 
+      client.current.rtc.localAudioTrack =
+        await AgoraRTC.createMicrophoneAudioTrack();
+      client.current.rtc.localVideoTrack =
+        await AgoraRTC.createCameraVideoTrack();
       // await client.current.rtm.client.clearChannelAttributes(channelName)
       await client.current.rtm.client.addOrUpdateChannelAttributes(
         channelName,
@@ -76,31 +65,28 @@ const App = () => {
         { enableNotificationToChannelMembers: true }
       );
 
-      if (ready) {
-        [
-          client.current.rtc.localAudioTrack,
-          client.current.rtc.localVideoTrack,
-        ] = tracks;
-        //Adding a User to the Users State
-        setUsers((prevUsers) => {
-          return [
-            ...prevUsers,
-            {
-              uid: uid,
-              audio: true,
-              video: true,
-              client: true,
-              videoTrack: tracks[1],
-              admin: admin,
-              username: userName,
-            },
-          ];
-        });
+      //Adding a User to the Users State
+      setUsers((prevUsers) => {
+        return [
+          ...prevUsers,
+          {
+            uid: uid,
+            audio: true,
+            video: true,
+            client: true,
+            videoTrack: client.current.rtc.localVideoTrack,
+            admin: admin,
+            username: userName,
+          },
+        ];
+      });
 
-        //Publishing your Streams
-        await client.current.rtc.client.publish([tracks[0], tracks[1]]);
-        setStart(true);
-      }
+      //Publishing your Streams
+      await client.current.rtc.client.publish([
+        client.current.rtc.localAudioTrack,
+        client.current.rtc.localVideoTrack,
+      ]);
+      setStart(true);
     } catch (error) {
       console.log(error);
     }
@@ -120,23 +106,77 @@ const App = () => {
       await client.current.rtm.client.logout();
       setUsers([]);
       setStart(false);
-    } else if (action === "video") {
-      setUsers((prevUsers) => {
-        console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
-        return prevUsers.map((user) => {
-          if (user.client) {
-            if (action === "audio") {
-              client.current.rtc.localAudioTrack.setEnabled(!user.audio);
-              return { ...user, audio: !user.audio };
-            } else if (action === "video") {
-              client.current.rtc.localVideoTrack.setEnabled(!user.video);
-              return { ...user, video: !user.video };
-            }
-          }
-          return user;
-        });
-      });
     } else {
+      // setUsers((prevUsers) => {
+      //   console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
+
+      //   return prevUsers.map((user) => {
+      //     if (user.client) {
+      //       if (action === "audio") {
+      //         client.current.rtc.localAudioTrack.setEnabled(!user.audio);
+      //         return { ...user, audio: !user.audio };
+      //       } else if (action === "video") {
+      //         console.log(
+      //           client.current.rtc.localVideoTrack._originMediaStreamTrack,
+      //           action
+      //         );
+      //         client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled =
+      //           !client.current.rtc.localVideoTrack._originMediaStreamTrack
+      //             .enabled;
+      //         // client.current.rtc.localVideoTrack.setEnabled(!user.video);
+      //         // return { ...user, video: !user.video };
+      //       }
+      //     }
+      //     return user;
+      //   });
+      // });
+
+      // setUsers((prevUsers) => {
+      //   console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
+      //   return prevUsers.map((user) => {
+      //     if (user.client) {
+      //       if (action === "audio") {
+      //         client.current.rtc.localAudioTrack.setEnabled(!user.audio);
+      //         return { ...user, audio: !user.audio };
+      //       } else if (action === "video") {
+      //         client.current.rtc.localVideoTrack.setEnabled(!user.video);
+      //         return { ...user, video: !user.video };
+      //       }
+      //     }
+      //     return user;
+      //   });
+      // });
+      if (action === "audio") {
+        setUsers((prevUsers: User[]) => {
+          return prevUsers.map((user) => {
+            console.log(user);
+            if (user.client) {
+              if (action === "audio") {
+                client.current.rtc.localAudioTrack.setEnabled(!user.audio);
+                return { ...user, audio: !user.audio };
+              }
+            }
+            return user;
+          });
+        });
+      } else if (action === "video") {
+        // setUsers((prevUsers) => {
+        //   console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
+        //   return prevUsers.map((user) => {
+        //     if (user.client) {
+        //       client.current.rtc.localVideoTrack.setEnabled(!user.video);
+        //       return { ...user, video: !user.video };
+        //     }
+        //     return user;
+        //   });
+        // });
+        console.log(
+          client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled,
+          !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled
+        );
+        client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled =
+          !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled;
+      }
     }
   };
 
@@ -145,6 +185,7 @@ const App = () => {
       "MessageFromPeer",
       async (message, memberId) => {
         let type = message.text;
+        console.log("memberId:", memberId);
         if (type === "audio" || type === "video") {
           action(type);
         } else if (type === "kick") {
