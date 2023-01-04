@@ -224,7 +224,7 @@ const App = () => {
             if (type === "video") {
               return {
                 ...User,
-                video: user.hasVideo,
+                video: true,
                 videoTrack: user.videoTrack,
               };
             } else if (type === "audio") {

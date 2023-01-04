@@ -72,12 +72,7 @@ const Controls = (props: Props) => {
       // Video 비활성화
       props.user.videoTrack.stop();
       // 화면공유 화면 실행
-      console.log(
-        "여기는 ??",
-        props.user.videoTrack,
-        props.vidDiv.current,
-        localScreenTracks.current
-      );
+
       localScreenTracks.current.play(props.vidDiv.current);
 
       //스크린 공유 종료 이벤트 리스너
@@ -107,7 +102,7 @@ const Controls = (props: Props) => {
     localScreenTracks.current &&
       localScreenTracks.current.stop(props.user.videoTrack);
     // Video 활성화
-    props.user.videoTrack.play(props.user.videoTrack);
+    props.user.videoTrack.play(props.vidDiv.current);
 
     await client.current.rtc.client.unpublish([localScreenTracks.current]);
     await client.current.rtc.client.publish([

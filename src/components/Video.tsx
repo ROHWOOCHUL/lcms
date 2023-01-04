@@ -25,14 +25,14 @@ export const Video = (props: Props) => {
   };
 
   useEffect(() => {
-    console.log(props.user);
+    // 화면공유를 위한 강제 렌더링이 필요함
     playVideo();
 
     return () => {
       stopVideo();
     };
     // eslint-disable-next-line
-  }, []);
+  }, [props.user]);
 
   return (
     <div className="vid" ref={vidDiv}>
