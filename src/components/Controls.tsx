@@ -1,8 +1,4 @@
-import AgoraRTC, {
-  ILocalAudioTrack,
-  ILocalVideoTrack,
-  createScreenVideoTrack,
-} from "agora-rtc-react";
+import AgoraRTC, { ILocalAudioTrack, ILocalVideoTrack } from "agora-rtc-react";
 import { FaMicrophone, FaVideo } from "react-icons/fa";
 import { useAdmin, useClientContext } from "../GlobalContext";
 import { useEffect, useRef, useState } from "react";
@@ -76,7 +72,12 @@ const Controls = (props: Props) => {
       // Video 비활성화
       props.user.videoTrack.stop();
       // 화면공유 화면 실행
-      console.log(props.vidDiv.current);
+      console.log(
+        "여기는 ??",
+        props.user.videoTrack,
+        props.vidDiv.current,
+        localScreenTracks.current
+      );
       localScreenTracks.current.play(props.vidDiv.current);
 
       //스크린 공유 종료 이벤트 리스너
