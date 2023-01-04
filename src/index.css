@@ -29,6 +29,13 @@ body {
   min-height: 80vh;
 }
 
+.user-container {
+  position: relative;
+  height: 95%;
+  width: 100%;
+  text-align: center;
+}
+
 .vid {
   position: relative;
   background-color: black;
@@ -36,6 +43,7 @@ body {
   width: 95%;
   border-radius: 30px;
   box-shadow: var(--shadow);
+  margin: auto;
 }
 
 .controls {
@@ -44,17 +52,16 @@ body {
   left: 50%;
   transform: translateX(-50%);
   margin: 20px auto;
-  /* padding: 10px 50px; */
+  padding: 10px 50px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(auto, 50%));
+  grid-template-columns: repeat(3, 33%);
   align-items: center;
   justify-items: center;
   background: rgba(0, 0, 0, 0.6);
   border-radius: 10px;
   z-index: 1;
-  /* width: 300px; */
-  max-width: 80vw;
-  min-height: 143.5px;
+  width: 300px;
+  max-width: 60vw;
 }
 
 .controls p {
@@ -70,6 +77,11 @@ body {
   color: black;
 }
 
+.noClick {
+  cursor: not-allowed !important;
+  opacity: 0.4;
+}
+
 .join {
   position: absolute;
   z-index: 1;
@@ -79,11 +91,12 @@ body {
   top: 50vh;
   left: 50vw;
   transform: translate(-50%, -50%);
-  background-color: #5a42f5;
+  background-color: #099dfd;
   padding: 30px;
   border-radius: 10px;
   width: 500px;
   max-width: 75vw;
+  text-align: center;
 }
 
 .join input {
@@ -92,8 +105,15 @@ body {
   outline: none;
   border: none;
   border-radius: 5px;
+  width: 80%;
   display: block;
-  width: -webkit-fill-available;
+  margin: 50px auto;
+}
+.join input[type="radio"] {
+  display: inline;
+  padding: 0;
+  margin: 0 10px 30px 10px;
+  width: auto;
 }
 
 .join button {
@@ -101,7 +121,6 @@ body {
   min-width: 200px;
   padding: 10px 0;
   text-align: center;
-  height: 50px;
   border-radius: 10px;
   background-color: white;
   outline: none;
@@ -111,8 +130,13 @@ body {
   cursor: pointer;
   display: block;
   margin: 0 auto;
+  margin-bottom: 20px;
+}
+
+.vid > div:last-of-type {
+  background-color: transparent !important;
 }
 
 .agora_video_player {
-  /* object-fit: contain !important; */
+  object-fit: contain !important;
 }
