@@ -1,6 +1,6 @@
 import AgoraRTC, { ILocalAudioTrack, ILocalVideoTrack } from "agora-rtc-react";
 import { FaMicrophone, FaVideo } from "react-icons/fa";
-import { useAdmin, useClientContext } from "../GlobalContext";
+import { useAdmin, useClientContext, useUsers } from "../GlobalContext";
 import { useEffect, useRef, useState } from "react";
 
 import { MdMonitor } from "react-icons/md";
@@ -10,12 +10,15 @@ interface Props {
   user: User;
   vidDiv: any;
   action: () => void;
+  sharingScreen: boolean;
+  setSharingScreen: (bool: boolean) => void;
+  sharingDiv: any;
 }
 
 const Controls = (props: Props) => {
-  const [sharingScreen, setSharingScreen] = useState<boolean>(false);
   const admin = useAdmin();
   const client = useClientContext();
+  const users = useUsers()[0];
   const localScreenTracks = useRef<
     ILocalVideoTrack | [ILocalVideoTrack, ILocalAudioTrack] | null | any
   >(null);
@@ -38,6 +41,10 @@ const Controls = (props: Props) => {
       { text: type },
       props.user.uid.toString()
     );
+  };
+
+  const messageVideoShare = (type, uid) => {
+    client.current.rtm.client.sendMessageToPeer({ text: type }, uid.toString());
   };
 
   const buildClassName = (type) => {
@@ -68,27 +75,33 @@ const Controls = (props: Props) => {
       //   },
       // },
       // "enable"
+      console.log("시작");
       localScreenTracks.current = await AgoraRTC.createScreenVideoTrack({});
 
       // Video 비활성화
-      props.user.videoTrack.stop();
+      // props.user.videoTrack.stop();
       // 화면공유 화면 실행
 
-      localScreenTracks.current.play(props.vidDiv.current);
+      localScreenTracks.current.play(props.sharingDiv.current);
 
       //스크린 공유 종료 이벤트 리스너
       // 이벤트 종료 리스너는 스크린 공유를 선언한 위치에서만 선언할 수 있다. (왜 그런지는 모름)
       localScreenTracks.current.on("track-ended", async () => {
         console.log("트래킹 종료");
         stopShareScreen();
-        setSharingScreen(false);
+        props.setSharingScreen(false);
       });
       console.log(client.current.rtc.client.unpublish);
-      await client.current.rtc.client.unpublish(
-        client.current.rtc.localVideoTrack
-      );
+      // await client.current.rtc.client.unpublish(
+      //   client.current.rtc.localVideoTrack
+      // );
       console.log(localScreenTracks.current);
-      await client.current.rtc.client.publish([localScreenTracks.current]);
+      // await client.current.rtc.client.publish([localScreenTracks.current]);
+      console.log("끝");
+      props.setSharingScreen(true);
+      users.forEach((user) => {
+        messageVideoShare("video-share", user.uid);
+      });
 
       // document.querySelector(".agora_video_player").style.objectFit = "contain";
       // console.log(document.querySelector(".agora_video_player"));
@@ -101,30 +114,38 @@ const Controls = (props: Props) => {
     console.log("화면 공유 중지", localScreenTracks.current);
     // 화면공유 화면 비활성화
     localScreenTracks.current &&
-      localScreenTracks.current.stop(props.user.videoTrack);
+      localScreenTracks.current.stop(props.sharingDiv.current);
     // Video 활성화
-    props.user.videoTrack.play(props.vidDiv.current);
+    // props.user.videoTrack.play(props.sharingDiv.current);
 
     await client.current.rtc.client.unpublish([localScreenTracks.current]);
     await client.current.rtc.client.publish([
       client.current.rtc.localAudioTrack,
       client.current.rtc.localVideoTrack,
     ]);
+    users.forEach((user) => {
+      messageVideoShare("video-share", user.uid);
+    });
+    props.setSharingScreen(false);
   };
 
   const toggleScreen = async () => {
-    if (!sharingScreen) {
-      setSharingScreen(true);
+    if (!props.sharingScreen) {
       shareScreen();
     } else {
-      setSharingScreen(false);
       stopShareScreen();
     }
   };
 
   useEffect(() => {
-    console.log("rerender");
-  }, [props.user]);
+    if (!admin.current) {
+      if (!props.sharingScreen) {
+        shareScreen();
+      } else {
+        stopShareScreen();
+      }
+    }
+  }, [props.sharingScreen]);
 
   return (
     <div className="controls">
@@ -149,7 +170,7 @@ const Controls = (props: Props) => {
           </span>
         </p>
       }
-      {props.user.client && (
+      {admin.current && props.user.client && (
         <p className={buildClassName("video")} onClick={toggleScreen}>
           <MdMonitor />
         </p>
