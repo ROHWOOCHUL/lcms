@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 import { AgoraVideoPlayer } from "agora-rtc-react";
 import Controls from "./Controls";
+import ScreenSharing from "./ScreenSharing";
 import Video from "./Video";
 import { motion } from "framer-motion";
 import { useUsers } from "../GlobalContext";
@@ -16,11 +17,10 @@ const Videos = (props: Props) => {
   const sharingDiv = useRef<HTMLDivElement>(null);
   return (
     <div id="videos" style={{ display: "flex", flexDirection: "column" }}>
-      <motion.div
-        style={{ width: "100%" }}
-        animate={{ height: props.sharingScreen ? "500px" : "0px" }}
-        ref={sharingDiv}
-      ></motion.div>
+      <ScreenSharing
+        sharingDiv={sharingDiv}
+        sharingScreen={props.sharingScreen}
+      />
       <div
         style={{
           display: "flex",

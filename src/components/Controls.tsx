@@ -1,6 +1,11 @@
 import AgoraRTC, { ILocalAudioTrack, ILocalVideoTrack } from "agora-rtc-react";
 import { FaMicrophone, FaVideo } from "react-icons/fa";
-import { useAdmin, useClientContext, useUsers } from "../GlobalContext";
+import {
+  useAdmin,
+  useClientContext,
+  useLocalScreenTack,
+  useUsers,
+} from "../GlobalContext";
 import { useEffect, useRef, useState } from "react";
 
 import { MdMonitor } from "react-icons/md";
@@ -19,9 +24,11 @@ const Controls = (props: Props) => {
   const admin = useAdmin();
   const client = useClientContext();
   const users = useUsers()[0];
-  const localScreenTracks = useRef<
-    ILocalVideoTrack | [ILocalVideoTrack, ILocalAudioTrack] | null | any
-  >(null);
+  // const localScreenTracks = useRef<
+  //   ILocalVideoTrack | [ILocalVideoTrack, ILocalAudioTrack] | null | any
+  // >(null);
+
+  const localScreenTracks = useLocalScreenTack();
   // localScreenTracks.current = createScreenVideoTrack({});
   // const useScreenVideoTrack = createScreenVideoTrack({});
   // const { ready, tracks, error } = useScreenVideoTrack();
@@ -76,7 +83,10 @@ const Controls = (props: Props) => {
       // },
       // "enable"
       console.log("시작");
+      // ac  = await AgoraRTC.join(uid:)
+      console.log("어드민의 UID는 ?:", users);
       localScreenTracks.current = await AgoraRTC.createScreenVideoTrack({});
+      console.log("나는 아고라 알티씨", AgoraRTC);
 
       // Video 비활성화
       // props.user.videoTrack.stop();
@@ -137,15 +147,15 @@ const Controls = (props: Props) => {
     }
   };
 
-  useEffect(() => {
-    if (!admin.current) {
-      if (!props.sharingScreen) {
-        shareScreen();
-      } else {
-        stopShareScreen();
-      }
-    }
-  }, [props.sharingScreen]);
+  // useEffect(() => {
+  //   if (!admin.current) {
+  //     if (!props.sharingScreen) {
+  //       shareScreen();
+  //     } else {
+  //       stopShareScreen();
+  //     }
+  //   }
+  // }, [props.sharingScreen]);
 
   return (
     <div className="controls">

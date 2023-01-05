@@ -1,3 +1,4 @@
+import { ILocalAudioTrack, ILocalVideoTrack } from "agora-rtc-react";
 import React, { createContext, useContext, useRef, useState } from "react";
 
 const UserContext = createContext(null);
@@ -5,6 +6,7 @@ const StartContext = createContext(null);
 const ClientContext = createContext(null);
 const LoadingContext = createContext(null);
 const AdminContext = createContext(null);
+const LocalScreenTrackContext = createContext(null);
 
 export const useUsers = (): any => {
   return useContext(UserContext);
@@ -22,6 +24,9 @@ export const useAdmin = (): any => {
 };
 export const useLoading = (): any => {
   return useContext(LoadingContext);
+};
+export const useLocalScreenTack = (): any => {
+  return useContext(LocalScreenTrackContext);
 };
 
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
@@ -49,17 +54,22 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
     },
   });
   const admin = useRef(false);
+  const localScreenTracks = useRef<
+    ILocalVideoTrack | [ILocalVideoTrack, ILocalAudioTrack] | null | any
+  >(null);
 
   return (
     <ClientContext.Provider value={client}>
       <AdminContext.Provider value={admin}>
-        <UserContext.Provider value={[users, setUsers]}>
-          <StartContext.Provider value={[start, setStart]}>
-            <LoadingContext.Provider value={[isLoading, setIsLoading]}>
-              {children}
-            </LoadingContext.Provider>
-          </StartContext.Provider>
-        </UserContext.Provider>
+        <LocalScreenTrackContext.Provider value={localScreenTracks}>
+          <UserContext.Provider value={[users, setUsers]}>
+            <StartContext.Provider value={[start, setStart]}>
+              <LoadingContext.Provider value={[isLoading, setIsLoading]}>
+                {children}
+              </LoadingContext.Provider>
+            </StartContext.Provider>
+          </UserContext.Provider>
+        </LocalScreenTrackContext.Provider>
       </AdminContext.Provider>
     </ClientContext.Provider>
   );
