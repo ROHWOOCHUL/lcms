@@ -6,10 +6,11 @@ import { User } from "../types";
 import { useClientContext } from "../GlobalContext";
 
 interface Props {
-  //   sharingScreen: boolean;
-  //   setSharingScreen: (bool: boolean) => void;
   user: User;
   action: (type: string) => void;
+  sharingScreen: boolean;
+  setSharingScreen: (bool: boolean) => void;
+  sharingDiv: any;
 }
 
 export const Video = (props: Props) => {
@@ -64,6 +65,9 @@ export const Video = (props: Props) => {
         user={props.user}
         action={props.action}
         vidDiv={vidDiv}
+        sharingScreen={props.sharingScreen}
+        setSharingScreen={props.setSharingScreen}
+        sharingDiv={props.sharingDiv}
       />
     </div>
   );

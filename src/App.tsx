@@ -25,8 +25,14 @@ const App = () => {
   //Whether you are the admin or not
   const admin = useAdmin();
   // const { ready, tracks } = useMicAndCamera();
+  const [sharingScreen, setSharingScreen] = useState<boolean>(false);
 
-  const init = async (channelName, appId, userName, admin) => {
+  const init = async (
+    channelName: string,
+    appId: string,
+    userName: string,
+    admin: boolean
+  ) => {
     try {
       // console.log(channelName, appId, userName, admin);
       client.current.rtc.client = AgoraRTC.createClient({
@@ -35,7 +41,7 @@ const App = () => {
       });
       initClientEvents();
 
-      let uid = await client.current.rtc.client.join(
+      let uid: string = await client.current.rtc.client.join(
         appId,
         channelName,
         null,
@@ -47,8 +53,8 @@ const App = () => {
         await client.current.rtm.client.createChannel(channelName);
       await client.current.rtm.channel.join();
       initRtmEvents();
-      let obj = {};
-      obj[`${uid}`] = JSON.stringify({
+      const userObj: any = {};
+      userObj[`${uid}`] = JSON.stringify({
         uid: uid,
         username: userName,
         admin: admin,
@@ -61,7 +67,7 @@ const App = () => {
       // await client.current.rtm.client.clearChannelAttributes(channelName)
       await client.current.rtm.client.addOrUpdateChannelAttributes(
         channelName,
-        obj,
+        userObj,
         { enableNotificationToChannelMembers: true }
       );
 
@@ -93,6 +99,7 @@ const App = () => {
   };
 
   let action = async (action) => {
+    console.log("action은 ???", action);
     if (action === "leave") {
       // Destroy the local audio and video tracks.
       await client.current.rtc.localAudioTrack.stop();
@@ -106,77 +113,39 @@ const App = () => {
       await client.current.rtm.client.logout();
       setUsers([]);
       setStart(false);
-    } else {
-      // setUsers((prevUsers) => {
-      //   console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
-
-      //   return prevUsers.map((user) => {
-      //     if (user.client) {
-      //       if (action === "audio") {
-      //         client.current.rtc.localAudioTrack.setEnabled(!user.audio);
-      //         return { ...user, audio: !user.audio };
-      //       } else if (action === "video") {
-      //         console.log(
-      //           client.current.rtc.localVideoTrack._originMediaStreamTrack,
-      //           action
-      //         );
-      //         client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled =
-      //           !client.current.rtc.localVideoTrack._originMediaStreamTrack
-      //             .enabled;
-      //         // client.current.rtc.localVideoTrack.setEnabled(!user.video);
-      //         // return { ...user, video: !user.video };
-      //       }
-      //     }
-      //     return user;
-      //   });
-      // });
-
-      // setUsers((prevUsers) => {
-      //   console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
-      //   return prevUsers.map((user) => {
-      //     if (user.client) {
-      //       if (action === "audio") {
-      //         client.current.rtc.localAudioTrack.setEnabled(!user.audio);
-      //         return { ...user, audio: !user.audio };
-      //       } else if (action === "video") {
-      //         client.current.rtc.localVideoTrack.setEnabled(!user.video);
-      //         return { ...user, video: !user.video };
-      //       }
-      //     }
-      //     return user;
-      //   });
-      // });
-      if (action === "audio") {
-        setUsers((prevUsers: User[]) => {
-          return prevUsers.map((user) => {
-            console.log(user);
-            if (user.client) {
-              if (action === "audio") {
-                client.current.rtc.localAudioTrack.setEnabled(!user.audio);
-                return { ...user, audio: !user.audio };
-              }
+    } else if (action === "audio") {
+      setUsers((prevUsers: User[]) => {
+        return prevUsers.map((user) => {
+          console.log(user);
+          if (user.client) {
+            if (action === "audio") {
+              client.current.rtc.localAudioTrack.setEnabled(!user.audio);
+              return { ...user, audio: !user.audio };
             }
-            return user;
-          });
+          }
+          return user;
         });
-      } else if (action === "video") {
-        setUsers((prevUsers) => {
-          console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
-          return prevUsers.map((user) => {
-            if (user.client) {
-              client.current.rtc.localVideoTrack.setEnabled(!user.video);
-              return { ...user, video: !user.video };
-            }
-            return user;
-          });
+      });
+    } else if (action === "video") {
+      setUsers((prevUsers) => {
+        console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
+        return prevUsers.map((user) => {
+          if (user.client) {
+            client.current.rtc.localVideoTrack.setEnabled(!user.video);
+            return { ...user, video: !user.video };
+          }
+          return user;
         });
-        console.log(
-          client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled,
-          !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled
-        );
-        client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled =
-          !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled;
-      }
+      });
+      console.log(
+        client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled,
+        !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled
+      );
+      client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled =
+        !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled;
+    } else if (action === "video-share") {
+      console.log("여기옴???");
+      setSharingScreen(!sharingScreen);
     }
   };
 
@@ -185,8 +154,7 @@ const App = () => {
       "MessageFromPeer",
       async (message, memberId) => {
         let type = message.text;
-        console.log("memberId:", memberId);
-        if (type === "audio" || type === "video") {
+        if (type === "audio" || type === "video" || type === "video-share") {
           action(type);
         } else if (type === "kick") {
           action("leave");
@@ -261,11 +229,21 @@ const App = () => {
         });
       });
     });
+
+    client.current.rtc.client.on("connection-state-change", async (user) => {
+      console.log("바뀌면 여기 옴??");
+    });
   };
 
   return (
     <div className="App">
-      {start && <Videos action={action} />}
+      {start && (
+        <Videos
+          action={action}
+          sharingScreen={sharingScreen}
+          setSharingScreen={setSharingScreen}
+        />
+      )}
       {!start && <ChannelForm initFunc={init} admin={admin} />}
     </div>
   );
