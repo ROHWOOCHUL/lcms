@@ -11,6 +11,8 @@ interface Props {
   action: () => Promise<void>;
   sharingScreen: boolean;
   setSharingScreen: (bool: boolean) => void;
+  isVideoPlay: boolean;
+  setIsVideoPlay: (bool: boolean) => void;
 }
 const Videos = (props: Props) => {
   const users = useUsers()[0];
@@ -53,6 +55,8 @@ const Videos = (props: Props) => {
                     action={props.action}
                     sharingScreen={props.sharingScreen}
                     setSharingScreen={props.setSharingScreen}
+                    isVideoPlay={props.isVideoPlay}
+                    setIsVideoPlay={props.setIsVideoPlay}
                     sharingDiv={sharingDiv}
                   />
                   {/* <Controls user={user} action={props.action} vidDiv={vidDiv} /> */}

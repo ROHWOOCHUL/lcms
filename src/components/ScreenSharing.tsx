@@ -12,10 +12,10 @@ const ScreenSharing = (props: Props) => {
   //       localScreenTrack.current &&
   //       localScreenTrack.current.play(props.sharingDiv.current);
   //   };
-  //   useEffect(() => {
-  //     console.log(localScreenTrack, localScreenTrack.current);
-  //     init();
-  //   }, [props.sharingScreen]);
+  useEffect(() => {
+    console.log(localScreenTrack, localScreenTrack.current);
+    //   init();
+  }, [props.sharingScreen]);
 
   return (
     <motion.div

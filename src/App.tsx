@@ -26,6 +26,7 @@ const App = () => {
   const admin = useAdmin();
   // const { ready, tracks } = useMicAndCamera();
   const [sharingScreen, setSharingScreen] = useState<boolean>(false);
+  const [isVideoPlay, setIsVideoPlay] = useState<boolean>(false);
 
   const init = async (
     channelName: string,
@@ -99,7 +100,6 @@ const App = () => {
   };
 
   let action = async (action) => {
-    console.log("action은 ???", action);
     if (action === "leave") {
       // Destroy the local audio and video tracks.
       await client.current.rtc.localAudioTrack.stop();
@@ -144,8 +144,10 @@ const App = () => {
       client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled =
         !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled;
     } else if (action === "video-share") {
-      console.log("여기옴???");
+      console.log("비디오 공유 옴");
       setSharingScreen(!sharingScreen);
+    } else {
+      setIsVideoPlay(true);
     }
   };
 
@@ -154,10 +156,16 @@ const App = () => {
       "MessageFromPeer",
       async (message, memberId) => {
         let type = message.text;
-        if (type === "audio" || type === "video" || type === "video-share") {
-          action(type);
-        } else if (type === "kick") {
+        // console.log(
+        //   "여기로 온다",
+        //   JSON.parse(message.text),
+        //   JSON.parse(message.text).src,
+        //   JSON.parse(message.text).praise
+        // );
+        if (type === "kick") {
           action("leave");
+        } else {
+          action(type);
         }
       }
     );
@@ -231,7 +239,7 @@ const App = () => {
     });
 
     client.current.rtc.client.on("connection-state-change", async (user) => {
-      console.log("바뀌면 여기 옴??");
+      console.log("connection-state-change");
     });
   };
 
@@ -242,6 +250,8 @@ const App = () => {
           action={action}
           sharingScreen={sharingScreen}
           setSharingScreen={setSharingScreen}
+          isVideoPlay={isVideoPlay}
+          setIsVideoPlay={setIsVideoPlay}
         />
       )}
       {!start && <ChannelForm initFunc={init} admin={admin} />}

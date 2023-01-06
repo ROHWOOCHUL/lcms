@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useAdmin, useClientContext } from "../GlobalContext";
 
 import AgoraRTC from "agora-rtc-sdk-ng";
 import Controls from "./Controls";
 import { User } from "../types";
-import { useClientContext } from "../GlobalContext";
 
 interface Props {
   user: User;
@@ -11,11 +11,14 @@ interface Props {
   sharingScreen: boolean;
   setSharingScreen: (bool: boolean) => void;
   sharingDiv: any;
+  isVideoPlay: boolean;
+  setIsVideoPlay: (bool: boolean) => void;
 }
 
 export const Video = (props: Props) => {
   const vidDiv = useRef(null);
   const client = useClientContext();
+  const admin = useAdmin();
 
   const playVideo = () => {
     props.user.videoTrack.play(vidDiv.current);
@@ -26,6 +29,7 @@ export const Video = (props: Props) => {
   };
 
   useEffect(() => {
+    console.log(props.user, props.user.client);
     // 화면공유를 위한 강제 렌더링이 필요함
     playVideo();
 
@@ -68,7 +72,28 @@ export const Video = (props: Props) => {
         sharingScreen={props.sharingScreen}
         setSharingScreen={props.setSharingScreen}
         sharingDiv={props.sharingDiv}
+        setIsVideoPlay={props.setIsVideoPlay}
       />
+      {props.isVideoPlay && (
+        <video
+          style={{
+            position: "absolute",
+            width: "300px",
+            height: "300px",
+            top: "0px",
+            left: "0px",
+          }}
+          controls
+          muted
+          loop
+          playsInline
+          autoPlay
+        >
+          <source
+            src={`https://static.hodooenglish.com/hds/hds_mainvideo.mp4`}
+          />
+        </video>
+      )}
     </div>
   );
 };
