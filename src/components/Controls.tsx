@@ -1,5 +1,6 @@
 import AgoraRTC, { ILocalAudioTrack, ILocalVideoTrack } from "agora-rtc-react";
 import { FaMicrophone, FaVideo } from "react-icons/fa";
+import { MdCleanHands, MdMonitor } from "react-icons/md";
 import {
   useAdmin,
   useClientContext,
@@ -8,7 +9,6 @@ import {
 } from "../GlobalContext";
 import { useEffect, useRef, useState } from "react";
 
-import { MdMonitor } from "react-icons/md";
 import { User } from "../types";
 
 interface Props {
@@ -40,6 +40,18 @@ const Controls = (props: Props) => {
         messageMaster(type);
       }
     }
+  };
+
+  const messageVideoTrigger = (type) => {
+    console.log(type, props.user, client);
+    client.current.rtm.client.sendMessageToPeer(
+      {
+        text: `{"${type}":"video","src":"https://static.hodooenglish.com/hds/hds_mainvideo.mp4"}`,
+        src: "비디오 주소",
+      },
+      props.user.uid.toString()
+    );
+    props.setIsVideoPlay(true);
   };
 
   const messageMaster = (type) => {
@@ -185,6 +197,11 @@ const Controls = (props: Props) => {
           <MdMonitor />
         </p>
       )}
+      {
+        <p onClick={() => messageVideoTrigger("praise")}>
+          <MdCleanHands />
+        </p>
+      }
       {admin.current && !props.user.client ? (
         <p onClick={() => messageMaster("kick")}>Kick</p>
       ) : (
