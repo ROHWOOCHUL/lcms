@@ -18,9 +18,10 @@ interface Props {
 
 const UserContainer = styled.div`
   width: 100%;
+  margin-right: 30px;
 
-  &:first-of-type {
-    margin-right: 30px;
+  &:last-of-type {
+    margin-right: 0px;
   }
 `;
 

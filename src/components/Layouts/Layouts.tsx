@@ -19,7 +19,6 @@ export const MainContainer = styled.div`
 
 export const MainContentContainer = styled.div`
   width: 100%;
-
   // desktop
   @media ${device.tablet} {
   }
@@ -31,6 +30,10 @@ export const Section = styled.div`
   flex-direction: column;
   align-items: center;
   margin: 0 auto;
+  margin-top: 60px;
+  @media ${device.tablet} {
+    margin-top: 80px;
+  }
 `;
 
 export const ContentWrapper = styled.div`
