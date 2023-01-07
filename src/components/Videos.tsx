@@ -79,7 +79,7 @@ const Videos = (props: Props) => {
       users.find((user) => !user.username || user.username === "anonymous"),
       vidDiv.current
     );
-    activeUsers.current = users.filter(
+    activeUsers.current.current = users.filter(
       (user) => !user.username || user.username !== "anonymous"
     );
     if (!admin.current) {
@@ -141,7 +141,9 @@ const Videos = (props: Props) => {
             ) {
               return (
                 <UserContainer
-                  style={{ marginRight: activeUsers.length === 1 ? "0px" : "" }}
+                  style={{
+                    marginRight: activeUsers.current.length === 1 ? "0px" : "",
+                  }}
                   className="user-container"
                   key={user.uid}
                 >
