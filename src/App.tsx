@@ -177,7 +177,9 @@ const App = () => {
           if (User.username) {
             return User;
           } else {
-            let usr = JSON.parse(attr[User.uid].value);
+            let usr = attr[User.uid]
+              ? JSON.parse(attr[User.uid]?.value)
+              : { username: "anonymous", admin: false };
             return { ...User, username: usr.username, admin: usr.admin };
           }
         });

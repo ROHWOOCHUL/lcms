@@ -8,7 +8,7 @@ const ChannelForm = ({
 }: {
   initFunc: (channelName: string, appId: string) => void;
 }) => {
-  const [channelName, setChannelName] = useState("test7201");
+  const [channelName, setChannelName] = useState("test72019490");
   const [appId, setappId] = useState("f964fae738a94dda88c3c54438449f49");
   const [userName, setUsername] = useState("aa");
   const [start, setStart] = useStart();

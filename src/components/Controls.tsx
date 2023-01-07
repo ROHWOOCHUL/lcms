@@ -97,29 +97,23 @@ const Controls = (props: Props) => {
       console.log("시작");
       // ac  = await AgoraRTC.join(uid:)
       console.log("어드민의 UID는 ?:", users);
-      localScreenTracks.current = await AgoraRTC.createScreenVideoTrack({});
+      // localScreenTracks.current = await AgoraRTC.createScreenVideoTrack({});
       console.log("나는 아고라 알티씨", AgoraRTC);
 
       // Video 비활성화
       // props.user.videoTrack.stop();
       // 화면공유 화면 실행
 
-      localScreenTracks.current.play(props.sharingDiv.current);
+      // localScreenTracks.current.play(props.sharingDiv.current);
 
       //스크린 공유 종료 이벤트 리스너
       // 이벤트 종료 리스너는 스크린 공유를 선언한 위치에서만 선언할 수 있다. (왜 그런지는 모름)
-      localScreenTracks.current.on("track-ended", async () => {
-        console.log("트래킹 종료");
-        stopShareScreen();
-        props.setSharingScreen(false);
-      });
-      console.log(client.current.rtc.client.unpublish);
-      // await client.current.rtc.client.unpublish(
-      //   client.current.rtc.localVideoTrack
-      // );
-      console.log(localScreenTracks.current);
-      // await client.current.rtc.client.publish([localScreenTracks.current]);
-      console.log("끝");
+      // localScreenTracks.current.on("track-ended", async () => {
+      //   console.log("트래킹 종료");
+      //   stopShareScreen();
+      //   props.setSharingScreen(false);
+      // });
+
       props.setSharingScreen(true);
       users.forEach((user) => {
         messageVideoShare("video-share", user.uid);
