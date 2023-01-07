@@ -29,6 +29,10 @@ const SharingScreenDiv = styled(motion.div)`
     object-fit: cover !important;
   }
 `;
+
+const UserLabel = styled.p`
+  color: white;
+`;
 const Videos = (props: Props) => {
   const users = useUsers()[0];
   const admin = useAdmin();
@@ -115,10 +119,18 @@ const Videos = (props: Props) => {
             if (user.videoTrack && user.username) {
               return (
                 <UserContainer className="user-container" key={user.uid}>
-                  {user.client && user.admin && <p>You(Admin)</p>}
-                  {user.client && !user.admin && <p>You(User)</p>}
-                  {user.admin && !user.client && <p>{user.username} (Admin)</p>}
-                  {!user.client && !user.admin && <p>{user.username} (User)</p>}
+                  {user.client && user.admin && (
+                    <UserLabel>You(Admin)</UserLabel>
+                  )}
+                  {user.client && !user.admin && (
+                    <UserLabel>You(User)</UserLabel>
+                  )}
+                  {user.admin && !user.client && (
+                    <UserLabel>{user.username} (Admin)</UserLabel>
+                  )}
+                  {!user.client && !user.admin && (
+                    <UserLabel>{user.username} (User)</UserLabel>
+                  )}
                   {/* {user.videoTrack && (
                   // <div style={{width: '95%', height: '95%'}} ref={vidDiv}>
                   <AgoraVideoPlayer
