@@ -1,11 +1,15 @@
+import { colors, device } from "../../theme";
+
 import { NavLink } from "react-router-dom";
 import React from "react";
-import { colors } from "../../theme";
 import styled from "@emotion/styled";
 const HeaderContainer = styled.div`
   width: 100%;
-  height: 80px;
+  height: 60px;
   background-color: white;
+  @media ${device.tablet} {
+    height: 80px;
+  }
 `;
 const HeaderWrapper = styled.div`
   height: 100%;
