@@ -79,7 +79,9 @@ const Videos = (props: Props) => {
         animate={{
           width: "100%",
           height:
-            props.sharingScreen && users.find((user) => !user.audio)?.videoTrack
+            props.sharingScreen &&
+            // 화면 공유 전용 유저가 있는지 확인
+            users.find((user) => !user.username)?.videoTrack
               ? "300px"
               : "0px",
         }}

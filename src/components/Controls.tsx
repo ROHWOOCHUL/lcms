@@ -129,16 +129,16 @@ const Controls = (props: Props) => {
   const stopShareScreen = async (): Promise<void> => {
     console.log("화면 공유 중지", localScreenTracks.current);
     // 화면공유 화면 비활성화
-    localScreenTracks.current &&
-      localScreenTracks.current.stop(props.sharingDiv.current);
-    // Video 활성화
-    // props.user.videoTrack.play(props.sharingDiv.current);
+    // localScreenTracks.current &&
+    //   localScreenTracks.current.stop(props.sharingDiv.current);
+    // // Video 활성화
+    // // props.user.videoTrack.play(props.sharingDiv.current);
 
-    await client.current.rtc.client.unpublish([localScreenTracks.current]);
-    await client.current.rtc.client.publish([
-      client.current.rtc.localAudioTrack,
-      client.current.rtc.localVideoTrack,
-    ]);
+    // await client.current.rtc.client.unpublish([localScreenTracks.current]);
+    // await client.current.rtc.client.publish([
+    //   client.current.rtc.localAudioTrack,
+    //   client.current.rtc.localVideoTrack,
+    // ]);
     users.forEach((user) => {
       messageVideoShare("video-share", user.uid);
     });
