@@ -6,6 +6,7 @@ import Controls from "./Controls";
 import ScreenSharing from "./ScreenSharing";
 import Video from "./Video";
 import { motion } from "framer-motion";
+import styled from "@emotion/styled";
 
 interface Props {
   action: () => Promise<void>;
@@ -14,6 +15,20 @@ interface Props {
   isVideoPlay: boolean;
   setIsVideoPlay: (bool: boolean) => void;
 }
+
+const UserContainer = styled.div`
+  width: 100%;
+
+  &:first-of-type {
+    margin-right: 30px;
+  }
+`;
+
+const SharingScreenDiv = styled(motion.div)`
+  video {
+    object-fit: cover !important;
+  }
+`;
 const Videos = (props: Props) => {
   const users = useUsers()[0];
   const admin = useAdmin();
@@ -74,7 +89,7 @@ const Videos = (props: Props) => {
           stopVideo={stopVideo}
         />
       )}
-      <motion.div
+      <SharingScreenDiv
         initial={{ height: "0px" }}
         animate={{
           width: "100%",
@@ -82,10 +97,9 @@ const Videos = (props: Props) => {
             props.sharingScreen &&
             // 화면 공유 전용 유저가 있는지 확인
             users.find((user) => !user.username)?.videoTrack
-              ? "300px"
+              ? "1000px"
               : "0px",
         }}
-        className="vid"
         ref={vidDiv}
       />
       <div
@@ -100,7 +114,7 @@ const Videos = (props: Props) => {
           users.map((user) => {
             if (user.videoTrack && user.username) {
               return (
-                <div className="user-container" key={user.uid}>
+                <UserContainer className="user-container" key={user.uid}>
                   {user.client && user.admin && <p>You(Admin)</p>}
                   {user.client && !user.admin && <p>You(User)</p>}
                   {user.admin && !user.client && <p>{user.username} (Admin)</p>}
@@ -125,7 +139,7 @@ const Videos = (props: Props) => {
                     sharingDiv={sharingDiv}
                   />
                   {/* <Controls user={user} action={props.action} vidDiv={vidDiv} /> */}
-                </div>
+                </UserContainer>
               );
             } else {
               return <div></div>;
