@@ -39,6 +39,8 @@ const Videos = (props: Props) => {
   const admin = useAdmin();
   const sharingDiv = useRef<HTMLDivElement>(null);
   const vidDiv = useRef(null);
+  const activeUsers = useRef([]);
+
   const screenshareConfig: any = useMemo(() => {
     return {
       appId: "f964fae738a94dda88c3c54438449f49",
@@ -66,18 +68,31 @@ const Videos = (props: Props) => {
   };
 
   const stopVideo = (user, vidDiv) => {
+    console.log("얘도 발생함 ??");
     user && vidDiv && user.videoTrack && user.videoTrack.stop();
   };
 
   useEffect(() => {
+    console.log(
+      "여기서 문제 발생함",
+      admin.current,
+      users.find((user) => !user.username || user.username === "anonymous"),
+      vidDiv.current
+    );
+    activeUsers.current = users.filter(
+      (user) => !user.username || user.username !== "anonymous"
+    );
     if (!admin.current) {
       // 화면공유를 위한 강제 렌더링이 필요함
-      const screenShareUser = users.find((user) => !user.username);
+      const screenShareUser = users.find(
+        (user) => !user.username || user.username === "anonymous"
+      );
+      if (screenShareUser) props.setSharingScreen(true);
       vidDiv.current && playVideo(screenShareUser, vidDiv.current);
 
-      return () => {
-        vidDiv && stopVideo(screenShareUser, vidDiv.current);
-      };
+      // return () => {
+      //   vidDiv && stopVideo(screenShareUser, vidDiv.current);
+      // };
     }
   }, [users]);
 
@@ -101,7 +116,9 @@ const Videos = (props: Props) => {
           height:
             props.sharingScreen &&
             // 화면 공유 전용 유저가 있는지 확인
-            users.find((user) => !user.username)?.videoTrack
+            users.find(
+              (user) => !user.username || user.username === "anonymous"
+            )?.videoTrack
               ? "1000px"
               : "0px",
         }}
@@ -117,9 +134,17 @@ const Videos = (props: Props) => {
       >
         {users.length &&
           users.map((user) => {
-            if (user.videoTrack && user.username) {
+            if (
+              user.videoTrack &&
+              user.username &&
+              user.username !== "anonymous"
+            ) {
               return (
-                <UserContainer className="user-container" key={user.uid}>
+                <UserContainer
+                  style={{ marginRight: activeUsers.length === 1 ? "0px" : "" }}
+                  className="user-container"
+                  key={user.uid}
+                >
                   {user.client && user.admin && (
                     <UserLabel>You(Admin)</UserLabel>
                   )}
@@ -155,7 +180,7 @@ const Videos = (props: Props) => {
                 </UserContainer>
               );
             } else {
-              return <div></div>;
+              return null;
             }
           })}
       </div>

@@ -143,9 +143,9 @@ const ScreenSharing = (props: Props) => {
     props.vidDiv.current &&
       props.playVideo(screenShareUser, props.vidDiv.current);
 
-    return () => {
-      props.vidDiv && props.stopVideo(screenShareUser, props.vidDiv.current);
-    };
+    // return () => {
+    //   props.vidDiv && props.stopVideo(screenShareUser, props.vidDiv.current);
+    // };
     // eslint-disable-next-line
   }, [props.users]);
 
