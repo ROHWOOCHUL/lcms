@@ -28,6 +28,8 @@ const HodooClass = () => {
   // const { ready, tracks } = useMicAndCamera();
   const [sharingScreen, setSharingScreen] = useState<boolean>(false);
   const [isVideoPlay, setIsVideoPlay] = useState<boolean>(false);
+  const [isPraiseTriggered, setIsPraiseTriggered] = useState<boolean>(false);
+  const [targetUserUid, setTargetUserUid] = useState<string>("");
 
   const init = async (
     channelName: string,
@@ -100,8 +102,9 @@ const HodooClass = () => {
     }
   };
 
-  let action = async (action: string) => {
-    if (action === "leave") {
+  let action = async (action: any) => {
+    console.log(action);
+    if (action.type === "leave") {
       // Destroy the local audio and video tracks.
       await client.current.rtc.localAudioTrack.stop();
       await client.current.rtc.localVideoTrack.stop();
@@ -114,12 +117,12 @@ const HodooClass = () => {
       await client.current.rtm.client.logout();
       setUsers([]);
       setStart(false);
-    } else if (action === "audio") {
+    } else if (action.type === "audio") {
       setUsers((prevUsers: User[]) => {
         return prevUsers.map((user) => {
           console.log(user);
           if (user.client) {
-            if (action === "audio") {
+            if (action.type === "audio") {
               client.current.rtc.localAudioTrack.setEnabled(!user.audio);
               return { ...user, audio: !user.audio };
             }
@@ -127,9 +130,9 @@ const HodooClass = () => {
           return user;
         });
       });
-    } else if (action === "video") {
+    } else if (action.type === "video") {
       setUsers((prevUsers) => {
-        console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
+        // console.log(client.current.rtc.localAudioTrack.getVolumeLevel());
         return prevUsers.map((user) => {
           if (user.client) {
             client.current.rtc.localVideoTrack.setEnabled(!user.video);
@@ -141,12 +144,16 @@ const HodooClass = () => {
 
       client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled =
         !client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled;
-    } else if (action === "video-share") {
+    } else if (action.type === "video-share") {
       console.log("비디오 공유 옴");
       setSharingScreen(!sharingScreen);
-    } else if (action === "video-trigger") {
+    } else if (action.type === "video-trigger") {
+      console.log("비디오 트리거 옴");
       setIsVideoPlay(true);
-    } else if (action === "praise") {
+    } else if (action.type === "praise") {
+      console.log("여기 왔어요");
+      setTargetUserUid(action.targetUserUid);
+      setIsPraiseTriggered(true);
     } else {
     }
   };
@@ -155,19 +162,18 @@ const HodooClass = () => {
     client.current.rtm.client.on(
       "MessageFromPeer",
       async (message: RtmMessage, memberId: string) => {
-        const type: string | undefined = message.text;
-        // console.log(
-        //   "여기로 온다",
-        //   JSON.parse(message.text),
-        //   JSON.parse(message.text).src,
-        //   JSON.parse(message.text).praise
-        // );
+        console.log(message);
+        const type: string | undefined = JSON.parse(message.text).type;
+        console.log(type);
+
+        // if (message.text && JSON.parse(message.text).type === "praise") {
+        //   setTargetUserUid(JSON.parse(message.text).targetUserUid);
+        //   action("praise");
+        //   return;
+        // }
         if (!type) return;
-        if (type === "kick") {
-          action("leave");
-        } else {
-          action(type);
-        }
+
+        action(JSON.parse(message.text));
       }
     );
 
@@ -257,6 +263,10 @@ const HodooClass = () => {
             setSharingScreen={setSharingScreen}
             isVideoPlay={isVideoPlay}
             setIsVideoPlay={setIsVideoPlay}
+            isPraiseTriggered={isPraiseTriggered}
+            setIsPraiseTriggered={setIsPraiseTriggered}
+            targetUserUid={targetUserUid}
+            setTargetUserUid={setTargetUserUid}
           />
         )}
         {!start && <ChannelForm initFunc={init} />}

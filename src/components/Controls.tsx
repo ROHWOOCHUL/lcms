@@ -19,10 +19,12 @@ import { colors } from "../theme";
 interface Props {
   user: User;
   vidDiv: RefObject<HTMLDivElement>;
-  action: (type: string) => void;
+  action: (type: any) => void;
   sharingScreen: boolean;
   setSharingScreen: (bool: boolean) => void;
   setIsVideoPlay: (bool: boolean) => void;
+  setIsPraiseTriggered: (bool: boolean) => void;
+  setTargetUserUid: (uid: UID) => void;
 }
 
 const Controls = (props: Props) => {
@@ -33,7 +35,7 @@ const Controls = (props: Props) => {
   const localScreenTracks = useLocalScreenTack();
   const muteMaster = (type: string) => {
     if (props.user.client) {
-      props.action(type);
+      props.action(JSON.parse(type));
     } else {
       if (admin.current) {
         messageMaster(type);
@@ -41,22 +43,49 @@ const Controls = (props: Props) => {
     }
   };
 
-  const messageVideoTrigger = (type: string) => {
+  const messageVideoTrigger = (type: string, src: string) => {
     console.log(type, props.user, client);
+    // if (props.user.client) {
+    // props.action({ type, src });
     props.user.uid &&
-      client.current.rtm.client.sendMessageToPeer(
-        {
-          text: `{"${type}":"video","src":"https://static.hodooenglish.com/hds/hds_mainvideo.mp4"}`,
-        },
-        props.user.uid.toString()
-      );
-    props.setIsVideoPlay(true);
+      users.forEach((user) => {
+        user.uid &&
+          client.current.rtm.client.sendMessageToPeer(
+            {
+              text: `{"type":"${type}","targetUserUid":"${src}"}`,
+            },
+            user.uid.toString()
+          );
+      });
+    props.action(JSON.parse(`{"type":"${type}","targetUserUid":"${src}"}`));
+    // }
+  };
+  const localPlayerStart = async () => {
+    // Create an audio track from a source file
+    const track = await AgoraRTC.createBufferSourceAudioTrack({
+      source:
+        "https://static.hodooenglish.com/hodooSchool/levelTest/SplashHodoo.mp3",
+    });
+
+    track.startProcessAudioBuffer({ loop: false });
+    track.play();
+    client.current.rtc.client.publish(track);
+  };
+  const messagePraiseTrigger = (type: string, targetUserUid?: UID) => {
+    props.user.uid &&
+      users.forEach((user) => {
+        user.uid &&
+          client.current.rtm.client.sendMessageToPeer(
+            { text: `{"type":"praise","targetUserUid":${targetUserUid}}` },
+            user.uid.toString()
+          );
+      });
+    props.setIsPraiseTriggered(true);
+    targetUserUid && props.setTargetUserUid(targetUserUid);
+    localPlayerStart();
   };
 
-  const messagePraiseTrigger = (type: string) => {};
-
   const messageMaster = (type: string) => {
-    console.log(type, props.user, client);
     props.user.uid &&
       client.current.rtm.client.sendMessageToPeer(
         { text: type },
@@ -71,15 +100,15 @@ const Controls = (props: Props) => {
   const buildClassName = (type: string) => {
     let str = "";
     // console.log(client.current.rtc.localVideoTrack, type);
-    // str += type === "audio" && props.user.audio ? "on " : "";
-    // str += type === "video" && props.user.video ? "on " : "";
     str += type === "audio" && props.user.audio ? "on " : "";
-    str +=
-      type === "video" &&
-      (client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled ||
-        props.user.video)
-        ? "on "
-        : "";
+    str += type === "video" && props.user.video ? "on " : "";
+    // str += type === "audio" && props.user.audio ? "on " : "";
+    // str +=
+    //   type === "video" &&
+    //   (client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled ||
+    //     props.user.video)
+    //     ? "on "
+    //     : "";
     client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled;
     str += !admin.current && !props.user.client ? "noClick" : "";
     return str;
@@ -170,7 +199,7 @@ const Controls = (props: Props) => {
       {
         <p
           className={buildClassName("audio")}
-          onClick={() => muteMaster("audio")}
+          onClick={() => muteMaster(`{"type":"audio"}`)}
         >
           <FaMicrophone />
         </p>
@@ -178,7 +207,7 @@ const Controls = (props: Props) => {
       {
         <p
           className={buildClassName("video")}
-          onClick={() => muteMaster("video")}
+          onClick={() => muteMaster(`{"type":"video"}`)}
         >
           <FaVideo />
           <span>
@@ -196,7 +225,12 @@ const Controls = (props: Props) => {
       {admin.current && props.user.client && (
         <p
           style={{ backgroundColor: "white", color: colors.gray100 }}
-          onClick={() => messageVideoTrigger("video-trigger")}
+          onClick={() =>
+            messageVideoTrigger(
+              "video-trigger",
+              "https://static.hodooenglish.com/hds/hds_mainvideo.mp4"
+            )
+          }
         >
           비디오 실행
         </p>
@@ -204,17 +238,19 @@ const Controls = (props: Props) => {
       {admin.current && !props.user.client && (
         <p
           style={{ backgroundColor: "white", color: colors.gray100 }}
-          onClick={() => messagePraiseTrigger("praise")}
+          onClick={() => messagePraiseTrigger("praise", props.user.uid)}
         >
           얘 칭찬
         </p>
       )}
       {admin.current && !props.user.client ? (
-        <p onClick={() => messageMaster("kick")}>Kick</p>
+        <p onClick={() => messageMaster(`{"type":"leave"}`)}>Kick</p>
       ) : (
         ""
       )}
-      {props.user.client && <p onClick={() => props.action("leave")}>Quit</p>}
+      {props.user.client && (
+        <p onClick={() => props.action({ type: "leave" })}>Quit</p>
+      )}
     </div>
   );
 };

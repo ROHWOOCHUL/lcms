@@ -33,6 +33,10 @@ interface Props {
   setSharingScreen: (bool: boolean) => void;
   isVideoPlay: boolean;
   setIsVideoPlay: (bool: boolean) => void;
+  isPraiseTriggered: boolean;
+  setIsPraiseTriggered: (bool: boolean) => void;
+  targetUserUid: string;
+  setTargetUserUid: (uid: string) => void;
 }
 const Videos = (props: Props) => {
   const users = useUsers()[0];
@@ -163,6 +167,10 @@ const Videos = (props: Props) => {
                     isVideoPlay={props.isVideoPlay}
                     setIsVideoPlay={props.setIsVideoPlay}
                     sharingDiv={sharingDiv}
+                    isPraiseTriggered={props.isPraiseTriggered}
+                    setIsPraiseTriggered={props.setIsPraiseTriggered}
+                    targetUserUid={props.targetUserUid}
+                    setTargetUserUid={props.setTargetUserUid}
                   />
                   {/* <Controls user={user} action={props.action} vidDiv={vidDiv} /> */}
                 </UserContainer>
