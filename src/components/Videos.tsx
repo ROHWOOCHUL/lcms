@@ -103,7 +103,7 @@ const Videos = (props: Props) => {
               ? "1000px"
               : "0px",
         }}
-        transition={{ delay: 0.3 }}
+        transition={{ delay: 0.5 }}
         ref={vidDiv}
       />
       <div
