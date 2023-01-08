@@ -10,35 +10,37 @@ import {
   createMicrophoneAndCameraTracks,
   createScreenVideoTrack,
 } from "agora-rtc-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  ReactElement,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
+import { User } from "../types";
 import Video from "./Video";
 import { useAdmin } from "../GlobalContext";
 
-interface Props {
-  screenshareConfig: any;
-  onScreenSharingStopped(): void;
-}
-
-// Create screen client
 const useScreenVideoClient = createClient({
   mode: "rtc",
   codec: "vp8",
 });
-// ScreenSharing component
-const ScreenSharing = (props: Props) => {
+
+interface Props {
+  screenshareConfig: any;
+  onScreenSharingStopped: () => void;
+  sharingScreen: boolean;
+  vidDiv: RefObject<HTMLDivElement>;
+  users: User[];
+  playVideo: (user: User, vidDiv: HTMLDivElement) => void;
+  stopVideo: (user: User, vidDiv: HTMLDivElement) => void;
+}
+const ScreenSharing = (props: Props): ReactElement | null => {
   const [initialized, setInitialized] = useState(false);
   const first = useRef(false);
   const admin = useAdmin();
 
-  // const playVideo = (user, vidDiv) => {
-  //   console.log("하..", user, vidDiv);
-  //   user && vidDiv && user.videoTrack && user.videoTrack.play(vidDiv);
-  // };
-
-  // const stopVideo = (user, vidDiv) => {
-  //   user && vidDiv && user.videoTrack && user.videoTrack.stop();
-  // };
   useEffect(() => {
     console.log("몇 번 렌더링 되는지??", props, first.current);
     first.current = true;
@@ -141,6 +143,7 @@ const ScreenSharing = (props: Props) => {
     // 화면공유를 위한 강제 렌더링이 필요함
     const screenShareUser = props.users.find((user) => !user.username);
     props.vidDiv.current &&
+      screenShareUser &&
       props.playVideo(screenShareUser, props.vidDiv.current);
 
     // return () => {
@@ -156,7 +159,6 @@ const ScreenSharing = (props: Props) => {
   // Toggle tracks for screenshared client
   if (toggleState) {
     // If on then turn it off
-    if (initialized) return;
     if (tracksRef.current) {
       const track = getScreenSharingVideoTrack(tracksRef.current);
       track.close();
@@ -168,7 +170,6 @@ const ScreenSharing = (props: Props) => {
     })();
   } else {
     // If off then turn it on
-    if (initialized) return;
     (async () => {
       await screenVideoClient.join(
         props.screenshareConfig.appId,
@@ -186,24 +187,7 @@ const ScreenSharing = (props: Props) => {
 
   const videoTrack = getScreenSharingVideoTrack(tracks);
 
-  return (
-    // props.users && (
-    <>
-      {/* Agora video player for screenshare */}
-      {/* <AgoraVideoPlayer className="video" videoTrack={videoTrack} /> */}
-
-      {/* Toggle Screenshare Button */}
-      <div id="screenshare-controls">
-        <button
-          onClick={() => setToggleState(!toggleState)}
-          id="toggle-screenshare-btn"
-        >
-          {toggleState ? "Start Screen Sharing" : "Stop Screen Sharing"}
-        </button>
-      </div>
-    </>
-    // )
-  );
+  return <></>;
 };
 
 export default ScreenSharing;

@@ -16,12 +16,12 @@ interface Props {
 }
 
 export const Video = (props: Props) => {
-  const vidDiv = useRef(null);
+  const vidDiv = useRef<HTMLDivElement>(null);
   const client = useClientContext();
   const admin = useAdmin();
 
   const playVideo = () => {
-    props.user.videoTrack.play(vidDiv.current);
+    vidDiv.current && props.user.videoTrack.play(vidDiv.current);
   };
 
   const stopVideo = () => {
@@ -64,14 +64,11 @@ export const Video = (props: Props) => {
         </div>
       )}
       <Controls
-        // user={props.user}
-        //       vidDiv={vidDiv}
         user={props.user}
         action={props.action}
         vidDiv={vidDiv}
         sharingScreen={props.sharingScreen}
         setSharingScreen={props.setSharingScreen}
-        sharingDiv={props.sharingDiv}
         setIsVideoPlay={props.setIsVideoPlay}
       />
       {props.isVideoPlay && (

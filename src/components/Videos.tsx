@@ -1,20 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAdmin, useClientContext, useUsers } from "../GlobalContext";
 
-import { AgoraVideoPlayer } from "agora-rtc-react";
 import Controls from "./Controls";
 import ScreenSharing from "./ScreenSharing";
+import { User } from "../types";
 import Video from "./Video";
 import { motion } from "framer-motion";
 import styled from "@emotion/styled";
-
-interface Props {
-  action: () => Promise<void>;
-  sharingScreen: boolean;
-  setSharingScreen: (bool: boolean) => void;
-  isVideoPlay: boolean;
-  setIsVideoPlay: (bool: boolean) => void;
-}
 
 const UserContainer = styled.div`
   width: 100%;
@@ -34,12 +26,20 @@ const SharingScreenDiv = styled(motion.div)`
 const UserLabel = styled.p`
   color: white;
 `;
+
+interface Props {
+  action: (action: string) => Promise<void>;
+  sharingScreen: boolean;
+  setSharingScreen: (bool: boolean) => void;
+  isVideoPlay: boolean;
+  setIsVideoPlay: (bool: boolean) => void;
+}
 const Videos = (props: Props) => {
   const users = useUsers()[0];
   const admin = useAdmin();
   const sharingDiv = useRef<HTMLDivElement>(null);
-  const vidDiv = useRef(null);
-  const activeUsers = useRef([]);
+  const vidDiv = useRef<HTMLDivElement>(null);
+  const activeUsers = useRef<User[]>([]);
 
   const screenshareConfig: any = useMemo(() => {
     return {
@@ -54,32 +54,16 @@ const Videos = (props: Props) => {
     console.log("Screensharing stopped.");
   }, []);
 
-  useEffect(() => {
-    console.log("유저리스트다", users);
-    console.log(
-      "얘가 스크린공유",
-      users.find((user) => !user.audio)
-    );
-  }, [users]);
-
-  const playVideo = (user, vidDiv) => {
-    console.log("하..", user, vidDiv);
+  const playVideo = (user: User, vidDiv: HTMLDivElement) => {
     user && vidDiv && user.videoTrack && user.videoTrack.play(vidDiv);
   };
 
-  const stopVideo = (user, vidDiv) => {
-    console.log("얘도 발생함 ??");
+  const stopVideo = (user: User, vidDiv: HTMLDivElement) => {
     user && vidDiv && user.videoTrack && user.videoTrack.stop();
   };
 
   useEffect(() => {
-    console.log(
-      "여기서 문제 발생함",
-      admin.current,
-      users.find((user) => !user.username || user.username === "anonymous"),
-      vidDiv.current
-    );
-    activeUsers.current.current = users.filter(
+    activeUsers.current = users.filter(
       (user) => !user.username || user.username !== "anonymous"
     );
     if (!admin.current) {
@@ -87,8 +71,10 @@ const Videos = (props: Props) => {
       const screenShareUser = users.find(
         (user) => !user.username || user.username === "anonymous"
       );
-      if (screenShareUser) props.setSharingScreen(true);
-      vidDiv.current && playVideo(screenShareUser, vidDiv.current);
+      if (screenShareUser) {
+        props.setSharingScreen(true);
+        vidDiv.current && playVideo(screenShareUser, vidDiv.current);
+      }
 
       // return () => {
       //   vidDiv && stopVideo(screenShareUser, vidDiv.current);
