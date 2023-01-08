@@ -1,11 +1,5 @@
-import AgoraRTC, {
-  ILocalAudioTrack,
-  ILocalVideoTrack,
-  UID,
-} from "agora-rtc-react";
+import AgoraRTC, { UID } from "agora-rtc-react";
 import { FaMicrophone, FaVideo } from "react-icons/fa";
-import { MdCleanHands, MdMonitor } from "react-icons/md";
-import { RefObject, useEffect, useRef, useState } from "react";
 import {
   useAdmin,
   useClientContext,
@@ -13,6 +7,8 @@ import {
   useUsers,
 } from "../GlobalContext";
 
+import { MdMonitor } from "react-icons/md";
+import { RefObject } from "react";
 import { User } from "../types";
 import { colors } from "../theme";
 

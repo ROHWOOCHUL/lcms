@@ -1,8 +1,7 @@
-import AgoraRTC, { UID } from "agora-rtc-sdk-ng";
-import React, { useEffect, useRef, useState } from "react";
-import { useAdmin, useClientContext } from "../GlobalContext";
+import { useEffect, useRef } from "react";
 
 import Controls from "./Controls";
+import { UID } from "agora-rtc-sdk-ng";
 import { User } from "../types";
 import { colors } from "../theme";
 
@@ -16,14 +15,12 @@ interface Props {
   setIsVideoPlay: (bool: boolean) => void;
   isPraiseTriggered: boolean;
   setIsPraiseTriggered: (bool: boolean) => void;
-  targetUserUid: string;
+  targetUserUid: UID;
   setTargetUserUid: (uid: UID) => void;
 }
 
 export const Video = (props: Props) => {
   const vidDiv = useRef<HTMLDivElement>(null);
-  const client = useClientContext();
-  const admin = useAdmin();
 
   const playVideo = () => {
     vidDiv.current && props.user.videoTrack.play(vidDiv.current);

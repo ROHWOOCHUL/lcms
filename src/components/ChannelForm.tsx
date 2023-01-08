@@ -15,7 +15,7 @@ const ChannelForm = (props: Props) => {
   const [channelName, setChannelName] = useState("test72019490");
   const [appId, setappId] = useState("f964fae738a94dda88c3c54438449f49");
   const [userName, setUsername] = useState("aa");
-  const [start, setStart] = useStart();
+  const [isLoading, setIsLoading] = useLoading();
   const admin = useAdmin();
   return (
     <form className="join">
@@ -54,12 +54,28 @@ const ChannelForm = (props: Props) => {
       />
       User
       <button
+        disabled={isLoading}
         onClick={(e) => {
           e.preventDefault();
           props.initFunc(channelName, appId, userName, admin.current);
         }}
       >
-        Join Call
+        {isLoading ? (
+          <>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <Loader width={24} mobileWidth={24} backgroundColor={"#5a42f5"} />
+            </div>
+          </>
+        ) : (
+          "Join Call"
+        )}
       </button>
     </form>
   );
