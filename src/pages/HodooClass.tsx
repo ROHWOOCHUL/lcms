@@ -138,17 +138,16 @@ const HodooClass = () => {
           return user;
         });
       });
-      console.log(
-        client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled,
-        !client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled
-      );
+
       client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled =
         !client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled;
     } else if (action === "video-share") {
       console.log("비디오 공유 옴");
       setSharingScreen(!sharingScreen);
-    } else {
+    } else if (action === "video-trigger") {
       setIsVideoPlay(true);
+    } else if (action === "praise") {
+    } else {
     }
   };
 
