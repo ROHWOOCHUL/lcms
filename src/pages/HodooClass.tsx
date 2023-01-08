@@ -1,35 +1,33 @@
 // import AgoraRTC from "agora-rtc-sdk-ng";
 import "../index.css";
 
-import AgoraRTC, { AgoraVideoPlayer, UID } from "agora-rtc-react";
+import AgoraRTC, { UID } from "agora-rtc-react";
 import AgoraRTM, { RtmMessage } from "agora-rtm-sdk";
 import { ContentWrapper, Section } from "../components/Layouts/Layouts";
 import {
-  GlobalProvider,
   useAdmin,
   useClientContext,
+  useLoading,
   useStart,
   useUsers,
 } from "../GlobalContext";
-import { useRef, useState } from "react";
 
 import ChannelForm from "../components/ChannelForm";
 import { User } from "../types";
 import Videos from "../components/Videos";
+import { useState } from "react";
 
 const HodooClass = () => {
   //Store the User Data
   const [users, setUsers] = useUsers();
   //Regulates the start of the video call
   const [start, setStart] = useStart();
+  const [isLoading, setIsLoading] = useLoading();
   const client = useClientContext();
-  //Whether you are the admin or not
-  const admin = useAdmin();
-  // const { ready, tracks } = useMicAndCamera();
   const [sharingScreen, setSharingScreen] = useState<boolean>(false);
   const [isVideoPlay, setIsVideoPlay] = useState<boolean>(false);
   const [isPraiseTriggered, setIsPraiseTriggered] = useState<boolean>(false);
-  const [targetUserUid, setTargetUserUid] = useState<string>("");
+  const [targetUserUid, setTargetUserUid] = useState<UID>("");
 
   const init = async (
     channelName: string,
@@ -38,7 +36,7 @@ const HodooClass = () => {
     admin: boolean
   ) => {
     try {
-      // console.log(channelName, appId, userName, admin);
+      setIsLoading(true);
       client.current.rtc.client = AgoraRTC.createClient({
         mode: "rtc",
         codec: "vp8",
@@ -97,7 +95,9 @@ const HodooClass = () => {
         client.current.rtc.localVideoTrack,
       ]);
       setStart(true);
+      setIsLoading(false);
     } catch (error) {
+      setIsLoading(false);
       console.log(error);
     }
   };
@@ -162,18 +162,11 @@ const HodooClass = () => {
     client.current.rtm.client.on(
       "MessageFromPeer",
       async (message: RtmMessage, memberId: string) => {
-        console.log(message);
-        const type: string | undefined = JSON.parse(message.text).type;
-        console.log(type);
-
-        // if (message.text && JSON.parse(message.text).type === "praise") {
-        //   setTargetUserUid(JSON.parse(message.text).targetUserUid);
-        //   action("praise");
-        //   return;
-        // }
-        if (!type) return;
-
-        action(JSON.parse(message.text));
+        if (message.text) {
+          const type: string | undefined = JSON.parse(message.text).type;
+          if (!type) return;
+          action(JSON.parse(message.text));
+        }
       }
     );
 

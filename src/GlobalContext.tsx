@@ -15,7 +15,10 @@ const StartContext =
     false
   );
 const ClientContext = createContext<MutableRefObject<Client>>({});
-const LoadingContext = createContext<boolean>(false);
+const LoadingContext =
+  createContext<[boolean, React.Dispatch<React.SetStateAction<boolean>>]>(
+    false
+  );
 const AdminContext = createContext<boolean>(false);
 const LocalScreenTrackContext = createContext(null);
 
@@ -37,7 +40,10 @@ export const useClientContext = () => {
 export const useAdmin = (): MutableRefObject<boolean> => {
   return useContext(AdminContext);
 };
-export const useLoading = (): boolean => {
+export const useLoading = (): [
+  boolean,
+  React.Dispatch<React.SetStateAction<boolean>>
+] => {
   return useContext(LoadingContext);
 };
 export const useLocalScreenTack = (): any => {

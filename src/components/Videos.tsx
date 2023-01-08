@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { useAdmin, useClientContext, useUsers } from "../GlobalContext";
+import { useAdmin, useUsers } from "../GlobalContext";
+import { useEffect, useMemo, useRef } from "react";
 
-import Controls from "./Controls";
 import ScreenSharing from "./ScreenSharing";
+import { UID } from "agora-rtc-sdk-ng";
 import { User } from "../types";
 import Video from "./Video";
 import { motion } from "framer-motion";
@@ -35,8 +35,8 @@ interface Props {
   setIsVideoPlay: (bool: boolean) => void;
   isPraiseTriggered: boolean;
   setIsPraiseTriggered: (bool: boolean) => void;
-  targetUserUid: string;
-  setTargetUserUid: (uid: string) => void;
+  targetUserUid: UID;
+  setTargetUserUid: (uid: UID) => void;
 }
 const Videos = (props: Props) => {
   const users = useUsers()[0];
@@ -45,17 +45,13 @@ const Videos = (props: Props) => {
   const vidDiv = useRef<HTMLDivElement>(null);
   const activeUsers = useRef<User[]>([]);
 
-  const screenshareConfig: any = useMemo(() => {
+  const screenShareConfig: any = useMemo(() => {
     return {
       appId: "f964fae738a94dda88c3c54438449f49",
       channelName: "test72019490",
       token: null,
       uid: null,
     };
-  }, []);
-
-  const onScreenSharingStopped = useCallback(() => {
-    console.log("Screensharing stopped.");
   }, []);
 
   const playVideo = (user: User, vidDiv: HTMLDivElement) => {
@@ -91,8 +87,7 @@ const Videos = (props: Props) => {
       {props.sharingScreen && admin.current && (
         <ScreenSharing
           sharingScreen={props.sharingScreen}
-          screenshareConfig={screenshareConfig}
-          onScreenSharingStopped={onScreenSharingStopped}
+          screenShareConfig={screenShareConfig}
           vidDiv={vidDiv}
           users={users}
           playVideo={playVideo}
@@ -149,15 +144,6 @@ const Videos = (props: Props) => {
                   {!user.client && !user.admin && (
                     <UserLabel>{user.username} (User)</UserLabel>
                   )}
-                  {/* {user.videoTrack && (
-                  // <div style={{width: '95%', height: '95%'}} ref={vidDiv}>
-                  <AgoraVideoPlayer
-                    ref={vidDiv}
-                    className="vid"
-                    videoTrack={user.videoTrack}
-                  ></AgoraVideoPlayer>
-                  // </div>
-                )} */}
                   <Video
                     key={user.uid}
                     user={user}

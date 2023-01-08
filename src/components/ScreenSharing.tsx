@@ -1,26 +1,12 @@
 import {
-  AgoraVideoPlayer,
-  ClientConfig,
-  IAgoraRTCRemoteUser,
-  ICameraVideoTrack,
   ILocalAudioTrack,
   ILocalVideoTrack,
-  IMicrophoneAudioTrack,
   createClient,
-  createMicrophoneAndCameraTracks,
   createScreenVideoTrack,
 } from "agora-rtc-react";
-import React, {
-  ReactElement,
-  RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactElement, RefObject, useEffect, useRef, useState } from "react";
 
 import { User } from "../types";
-import Video from "./Video";
-import { useAdmin } from "../GlobalContext";
 
 const useScreenVideoClient = createClient({
   mode: "rtc",
@@ -28,8 +14,7 @@ const useScreenVideoClient = createClient({
 });
 
 interface Props {
-  screenshareConfig: any;
-  onScreenSharingStopped: () => void;
+  screenShareConfig: any;
   sharingScreen: boolean;
   vidDiv: RefObject<HTMLDivElement>;
   users: User[];
@@ -37,15 +22,6 @@ interface Props {
   stopVideo: (user: User, vidDiv: HTMLDivElement) => void;
 }
 const ScreenSharing = (props: Props): ReactElement | null => {
-  const [initialized, setInitialized] = useState(false);
-  const first = useRef(false);
-  const admin = useAdmin();
-
-  useEffect(() => {
-    console.log("몇 번 렌더링 되는지??", props, first.current);
-    first.current = true;
-  }, []);
-
   const useScreenVideoTrack = createScreenVideoTrack({
     encoderConfig: "1080p_1",
     optimizationMode: "detail",
@@ -65,29 +41,20 @@ const ScreenSharing = (props: Props): ReactElement | null => {
   const tracksRef = useRef(tracks);
   const [toggleState, setToggleState] = useState<boolean>(false);
 
-  const { onScreenSharingStopped } = props;
-
   useEffect(() => {
     tracksRef.current = tracks;
   }, [tracks]);
 
   useEffect(() => {
-    if (error !== null) {
-      console.error("An error occurred while sharing the screen.", error);
-      onScreenSharingStopped();
-    }
-  }, [error, onScreenSharingStopped]);
-
-  useEffect(() => {
     const init = async (channelName: string) => {
-      if (!props.screenshareConfig) return;
+      if (!props.screenShareConfig) return;
 
       try {
         await screenVideoClient.join(
-          props.screenshareConfig.appId,
+          props.screenShareConfig.appId,
           channelName,
-          props.screenshareConfig.token,
-          props.screenshareConfig.uid
+          props.screenShareConfig.token,
+          props.screenShareConfig.uid
         );
         const videoTrack = getScreenSharingVideoTrack(tracks);
         if (tracks) await screenVideoClient.publish(videoTrack);
@@ -96,8 +63,8 @@ const ScreenSharing = (props: Props): ReactElement | null => {
       }
     };
 
-    if (props.screenshareConfig && ready && tracks && initialized) {
-      init(props.screenshareConfig.channelName);
+    if (props.screenShareConfig && ready && tracks) {
+      init(props.screenShareConfig.channelName);
     }
   }, []);
 
@@ -105,13 +72,11 @@ const ScreenSharing = (props: Props): ReactElement | null => {
     const videoTrack = getScreenSharingVideoTrack(tracks);
     if (videoTrack) {
       videoTrack.on("track-ended", () => {
-        onScreenSharingStopped();
-        stopScreenshare();
+        stopScreenShare();
         setToggleState(false);
       });
     }
-    // Stop and remove all tracks for screenshared client
-    function stopScreenshare() {
+    const stopScreenShare = () => {
       if (tracksRef.current) {
         const track = getScreenSharingVideoTrack(tracksRef.current);
         track.close();
@@ -121,8 +86,8 @@ const ScreenSharing = (props: Props): ReactElement | null => {
         await screenVideoClient.leave();
         screenVideoClient.removeAllListeners();
       })();
-    }
-  }, [onScreenSharingStopped, tracks, screenVideoClient]);
+    };
+  }, [tracks, screenVideoClient]);
 
   useEffect(() => {
     return () => {
@@ -145,20 +110,13 @@ const ScreenSharing = (props: Props): ReactElement | null => {
     props.vidDiv.current &&
       screenShareUser &&
       props.playVideo(screenShareUser, props.vidDiv.current);
-
-    // return () => {
-    //   props.vidDiv && props.stopVideo(screenShareUser, props.vidDiv.current);
-    // };
-    // eslint-disable-next-line
   }, [props.users]);
 
   if (!ready) {
     return null;
   }
 
-  // Toggle tracks for screenshared client
   if (toggleState) {
-    // If on then turn it off
     if (tracksRef.current) {
       const track = getScreenSharingVideoTrack(tracksRef.current);
       track.close();
@@ -169,23 +127,19 @@ const ScreenSharing = (props: Props): ReactElement | null => {
       screenVideoClient.removeAllListeners();
     })();
   } else {
-    // If off then turn it on
     (async () => {
       await screenVideoClient.join(
-        props.screenshareConfig.appId,
-        props.screenshareConfig.channelName,
-        props.screenshareConfig.token,
-        props.screenshareConfig.uid
+        props.screenShareConfig.appId,
+        props.screenShareConfig.channelName,
+        props.screenShareConfig.token,
+        props.screenShareConfig.uid
       );
-      // Using the screen client hook
       if (!null) {
         const videoTrack = getScreenSharingVideoTrack(tracks);
         if (tracks) await screenVideoClient.publish(videoTrack);
       }
     })();
   }
-
-  const videoTrack = getScreenSharingVideoTrack(tracks);
 
   return <></>;
 };
