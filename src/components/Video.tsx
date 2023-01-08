@@ -1,9 +1,10 @@
+import AgoraRTC, { UID } from "agora-rtc-sdk-ng";
 import React, { useEffect, useRef, useState } from "react";
 import { useAdmin, useClientContext } from "../GlobalContext";
 
-import AgoraRTC from "agora-rtc-sdk-ng";
 import Controls from "./Controls";
 import { User } from "../types";
+import { colors } from "../theme";
 
 interface Props {
   user: User;
@@ -13,6 +14,10 @@ interface Props {
   sharingDiv: any;
   isVideoPlay: boolean;
   setIsVideoPlay: (bool: boolean) => void;
+  isPraiseTriggered: boolean;
+  setIsPraiseTriggered: (bool: boolean) => void;
+  targetUserUid: string;
+  setTargetUserUid: (uid: UID) => void;
 }
 
 export const Video = (props: Props) => {
@@ -38,6 +43,15 @@ export const Video = (props: Props) => {
     };
     // eslint-disable-next-line
   }, [props.user]);
+
+  useEffect(() => {
+    if (props.isPraiseTriggered) {
+      setTimeout(() => {
+        props.setTargetUserUid("");
+        props.setIsPraiseTriggered(false);
+      }, 3000);
+    }
+  }, [props.isPraiseTriggered]);
 
   return (
     <div className="vid" ref={vidDiv}>
@@ -70,6 +84,8 @@ export const Video = (props: Props) => {
         sharingScreen={props.sharingScreen}
         setSharingScreen={props.setSharingScreen}
         setIsVideoPlay={props.setIsVideoPlay}
+        setIsPraiseTriggered={props.setIsPraiseTriggered}
+        setTargetUserUid={props.setTargetUserUid}
       />
       {props.isVideoPlay && (
         <video
@@ -90,6 +106,22 @@ export const Video = (props: Props) => {
             src={`https://static.hodooenglish.com/hds/hds_mainvideo.mp4`}
           />
         </video>
+      )}
+      {props.isPraiseTriggered && props.user.uid === props.targetUserUid && (
+        <h2
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            fontSize: "32px",
+            color: colors.white,
+            fontWeight: 700,
+            transform: "translate(-50%,-120%)",
+            zIndex: 99999,
+          }}
+        >
+          잘했다.
+        </h2>
       )}
     </div>
   );
