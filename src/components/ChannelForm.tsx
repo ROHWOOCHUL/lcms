@@ -3,11 +3,15 @@ import { useAdmin, useLoading, useStart, useUsers } from "../GlobalContext";
 
 import Loader from "./Loader";
 
-const ChannelForm = ({
-  initFunc,
-}: {
-  initFunc: (channelName: string, appId: string) => void;
-}) => {
+interface Props {
+  initFunc: (
+    channelName: string,
+    appId: string,
+    userName: string,
+    admin: boolean
+  ) => Promise<void>;
+}
+const ChannelForm = (props: Props) => {
   const [channelName, setChannelName] = useState("test72019490");
   const [appId, setappId] = useState("f964fae738a94dda88c3c54438449f49");
   const [userName, setUsername] = useState("aa");
@@ -52,7 +56,7 @@ const ChannelForm = ({
       <button
         onClick={(e) => {
           e.preventDefault();
-          initFunc(channelName, appId, userName, admin.current);
+          props.initFunc(channelName, appId, userName, admin.current);
         }}
       >
         Join Call

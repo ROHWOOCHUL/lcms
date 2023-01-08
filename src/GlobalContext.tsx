@@ -1,28 +1,43 @@
+import { Client, User } from "./types";
 import { ILocalAudioTrack, ILocalVideoTrack } from "agora-rtc-react";
-import React, { createContext, useContext, useRef, useState } from "react";
+import React, {
+  MutableRefObject,
+  createContext,
+  useContext,
+  useRef,
+  useState,
+} from "react";
 
-const UserContext = createContext(null);
-const StartContext = createContext(null);
-const ClientContext = createContext(null);
-const LoadingContext = createContext(null);
-const AdminContext = createContext(null);
+const UserContext =
+  createContext<[User[], React.Dispatch<React.SetStateAction<User[]>>]>();
+const StartContext =
+  createContext<[boolean, React.Dispatch<React.SetStateAction<boolean>>]>(
+    false
+  );
+const ClientContext = createContext<MutableRefObject<Client>>({});
+const LoadingContext = createContext<boolean>(false);
+const AdminContext = createContext<boolean>(false);
 const LocalScreenTrackContext = createContext(null);
 
-export const useUsers = (): any => {
+export const useUsers = ():
+  | [User[], React.Dispatch<React.SetStateAction<User[]>>] => {
   return useContext(UserContext);
 };
 
-export const useStart = (): any => {
+export const useStart = (): [
+  boolean,
+  React.Dispatch<React.SetStateAction<boolean>>
+] => {
   return useContext(StartContext);
 };
 
-export const useClientContext = (): any => {
+export const useClientContext = () => {
   return useContext(ClientContext);
 };
-export const useAdmin = (): any => {
+export const useAdmin = (): MutableRefObject<boolean> => {
   return useContext(AdminContext);
 };
-export const useLoading = (): any => {
+export const useLoading = (): boolean => {
   return useContext(LoadingContext);
 };
 export const useLocalScreenTack = (): any => {
@@ -30,17 +45,10 @@ export const useLocalScreenTack = (): any => {
 };
 
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [start, setStart] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const rtc = useRef({
-    // For the local client.
-    client: null,
-    // For the local audio and video tracks.
-    localAudioTrack: null,
-    localVideoTrack: null,
-  });
-  const client = useRef({
+  const client = useRef<Client>({
     rtc: {
       // For the local client.
       client: null,
@@ -53,7 +61,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       channel: null,
     },
   });
-  const admin = useRef(false);
+  const admin = useRef<boolean>(false);
   const localScreenTracks = useRef<
     ILocalVideoTrack | [ILocalVideoTrack, ILocalAudioTrack] | null | any
   >(null);

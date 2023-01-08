@@ -1,38 +1,36 @@
-import AgoraRTC, { ILocalAudioTrack, ILocalVideoTrack } from "agora-rtc-react";
+import AgoraRTC, {
+  ILocalAudioTrack,
+  ILocalVideoTrack,
+  UID,
+} from "agora-rtc-react";
 import { FaMicrophone, FaVideo } from "react-icons/fa";
 import { MdCleanHands, MdMonitor } from "react-icons/md";
+import { RefObject, useEffect, useRef, useState } from "react";
 import {
   useAdmin,
   useClientContext,
   useLocalScreenTack,
   useUsers,
 } from "../GlobalContext";
-import { useEffect, useRef, useState } from "react";
 
 import { User } from "../types";
 
 interface Props {
   user: User;
-  vidDiv: any;
-  action: () => void;
+  vidDiv: RefObject<HTMLDivElement>;
+  action: (type: string) => void;
   sharingScreen: boolean;
   setSharingScreen: (bool: boolean) => void;
-  sharingDiv: any;
+  setIsVideoPlay: (bool: boolean) => void;
 }
 
 const Controls = (props: Props) => {
   const admin = useAdmin();
   const client = useClientContext();
   const users = useUsers()[0];
-  // const localScreenTracks = useRef<
-  //   ILocalVideoTrack | [ILocalVideoTrack, ILocalAudioTrack] | null | any
-  // >(null);
 
   const localScreenTracks = useLocalScreenTack();
-  // localScreenTracks.current = createScreenVideoTrack({});
-  // const useScreenVideoTrack = createScreenVideoTrack({});
-  // const { ready, tracks, error } = useScreenVideoTrack();
-  const muteMaster = (type) => {
+  const muteMaster = (type: string) => {
     if (props.user.client) {
       props.action(type);
     } else {
@@ -42,31 +40,32 @@ const Controls = (props: Props) => {
     }
   };
 
-  const messageVideoTrigger = (type) => {
+  const messageVideoTrigger = (type: string) => {
     console.log(type, props.user, client);
-    client.current.rtm.client.sendMessageToPeer(
-      {
-        text: `{"${type}":"video","src":"https://static.hodooenglish.com/hds/hds_mainvideo.mp4"}`,
-        src: "비디오 주소",
-      },
-      props.user.uid.toString()
-    );
+    props.user.uid &&
+      client.current.rtm.client.sendMessageToPeer(
+        {
+          text: `{"${type}":"video","src":"https://static.hodooenglish.com/hds/hds_mainvideo.mp4"}`,
+        },
+        props.user.uid.toString()
+      );
     props.setIsVideoPlay(true);
   };
 
-  const messageMaster = (type) => {
+  const messageMaster = (type: string) => {
     console.log(type, props.user, client);
-    client.current.rtm.client.sendMessageToPeer(
-      { text: type },
-      props.user.uid.toString()
-    );
+    props.user.uid &&
+      client.current.rtm.client.sendMessageToPeer(
+        { text: type },
+        props.user.uid.toString()
+      );
   };
 
-  const messageVideoShare = (type, uid) => {
+  const messageVideoShare = (type: string, uid: UID) => {
     client.current.rtm.client.sendMessageToPeer({ text: type }, uid.toString());
   };
 
-  const buildClassName = (type) => {
+  const buildClassName = (type: string) => {
     let str = "";
     // console.log(client.current.rtc.localVideoTrack, type);
     // str += type === "audio" && props.user.audio ? "on " : "";
@@ -74,11 +73,11 @@ const Controls = (props: Props) => {
     str += type === "audio" && props.user.audio ? "on " : "";
     str +=
       type === "video" &&
-      (client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled ||
+      (client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled ||
         props.user.video)
         ? "on "
         : "";
-    client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled;
+    client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled;
     str += !admin.current && !props.user.client ? "noClick" : "";
     return str;
   };
@@ -116,7 +115,7 @@ const Controls = (props: Props) => {
 
       props.setSharingScreen(true);
       users.forEach((user) => {
-        messageVideoShare("video-share", user.uid);
+        user.uid && messageVideoShare("video-share", user.uid);
       });
 
       // document.querySelector(".agora_video_player").style.objectFit = "contain";
@@ -140,7 +139,7 @@ const Controls = (props: Props) => {
     //   client.current.rtc.localVideoTrack,
     // ]);
     users.forEach((user) => {
-      messageVideoShare("video-share", user.uid);
+      user.uid && messageVideoShare("video-share", user.uid);
     });
     props.setSharingScreen(false);
   };
@@ -180,7 +179,7 @@ const Controls = (props: Props) => {
         >
           <FaVideo />
           <span>
-            {client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled
+            {client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled
               ? "on"
               : "off"}
           </span>

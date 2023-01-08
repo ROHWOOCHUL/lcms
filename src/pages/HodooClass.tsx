@@ -1,7 +1,8 @@
 // import AgoraRTC from "agora-rtc-sdk-ng";
 import "../index.css";
 
-import AgoraRTC, { AgoraVideoPlayer } from "agora-rtc-react";
+import AgoraRTC, { AgoraVideoPlayer, UID } from "agora-rtc-react";
+import AgoraRTM, { RtmMessage } from "agora-rtm-sdk";
 import { ContentWrapper, Section } from "../components/Layouts/Layouts";
 import {
   GlobalProvider,
@@ -12,13 +13,10 @@ import {
 } from "../GlobalContext";
 import { useRef, useState } from "react";
 
-import AgoraRTM from "agora-rtm-sdk";
 import ChannelForm from "../components/ChannelForm";
+import { User } from "../types";
 import Videos from "../components/Videos";
 
-console.log(AgoraRTC);
-// const useClient = createClient({ mode: "rtc", codec: "vp8" });
-// const useMicAndCamera = createMicrophoneAndCameraTracks();
 const HodooClass = () => {
   //Store the User Data
   const [users, setUsers] = useUsers();
@@ -45,7 +43,7 @@ const HodooClass = () => {
       });
       initClientEvents();
 
-      let uid: string = await client.current.rtc.client.join(
+      let uid: UID = await client.current.rtc.client.join(
         appId,
         channelName,
         null,
@@ -102,14 +100,14 @@ const HodooClass = () => {
     }
   };
 
-  let action = async (action) => {
+  let action = async (action: string) => {
     if (action === "leave") {
       // Destroy the local audio and video tracks.
       await client.current.rtc.localAudioTrack.stop();
       await client.current.rtc.localVideoTrack.stop();
       await client.current.rtm.client.deleteChannelAttributesByKeys(
         client.current.rtm.channel.channelId,
-        [client.current.rtc.client.uid.toString()]
+        [client.current.rtc.client.uid!.toString()]
       );
       await client.current.rtc.client.leave();
       await client.current.rtm.channel.leave();
@@ -141,11 +139,11 @@ const HodooClass = () => {
         });
       });
       console.log(
-        client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled,
-        !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled
+        client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled,
+        !client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled
       );
-      client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled =
-        !client.current.rtc.localVideoTrack._originMediaStreamTrack.enabled;
+      client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled =
+        !client.current.rtc.localVideoTrack.getMediaStreamTrack().enabled;
     } else if (action === "video-share") {
       console.log("비디오 공유 옴");
       setSharingScreen(!sharingScreen);
@@ -157,14 +155,15 @@ const HodooClass = () => {
   const initRtmEvents = () => {
     client.current.rtm.client.on(
       "MessageFromPeer",
-      async (message, memberId) => {
-        let type = message.text;
+      async (message: RtmMessage, memberId: string) => {
+        const type: string | undefined = message.text;
         // console.log(
         //   "여기로 온다",
         //   JSON.parse(message.text),
         //   JSON.parse(message.text).src,
         //   JSON.parse(message.text).praise
         // );
+        if (!type) return;
         if (type === "kick") {
           action("leave");
         } else {
@@ -175,11 +174,12 @@ const HodooClass = () => {
 
     client.current.rtm.channel.on("AttributesUpdated", (attr) => {
       console.log(attr);
-      setUsers((prevUsers) => {
+      setUsers((prevUsers): any => {
         return prevUsers.map((User) => {
           if (User.username) {
             return User;
           } else {
+            if (!User.uid) return;
             let usr = attr[User.uid]
               ? JSON.parse(attr[User.uid]?.value)
               : { username: "anonymous", admin: false };
@@ -192,14 +192,14 @@ const HodooClass = () => {
 
   const initClientEvents = () => {
     client.current.rtc.client.on("user-joined", async (user) => {
-      setUsers((prevUsers) => {
+      setUsers((prevUsers): any => {
         return [...prevUsers, { uid: user.uid, client: false }];
       });
     });
 
     client.current.rtc.client.on("user-published", async (user, type) => {
       await client.current.rtc.client.subscribe(user, type);
-      setUsers((prevUsers) => {
+      setUsers((prevUsers): any => {
         return prevUsers.map((User) => {
           if (User.uid === user.uid) {
             if (type === "video") {
@@ -209,7 +209,7 @@ const HodooClass = () => {
                 videoTrack: user.videoTrack,
               };
             } else if (type === "audio") {
-              user.audioTrack.play();
+              user.audioTrack && user.audioTrack.play();
               return { ...User, audio: user.hasAudio };
             }
           }
@@ -260,7 +260,7 @@ const HodooClass = () => {
             setIsVideoPlay={setIsVideoPlay}
           />
         )}
-        {!start && <ChannelForm initFunc={init} admin={admin} />}
+        {!start && <ChannelForm initFunc={init} />}
       </ContentWrapper>
     </Section>
   );
