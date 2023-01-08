@@ -164,6 +164,7 @@ const HodooClass = () => {
       async (message: RtmMessage, memberId: string) => {
         if (message.text) {
           const type: string | undefined = JSON.parse(message.text).type;
+          console.log(message.text, type);
           if (!type) return;
           action(JSON.parse(message.text));
         }

@@ -90,7 +90,10 @@ const Controls = (props: Props) => {
   };
 
   const messageVideoShare = (type: string, uid: UID) => {
-    client.current.rtm.client.sendMessageToPeer({ text: type }, uid.toString());
+    client.current.rtm.client.sendMessageToPeer(
+      { text: `{"type":"${type}"}` },
+      uid.toString()
+    );
   };
 
   const buildClassName = (type: string) => {
@@ -236,7 +239,7 @@ const Controls = (props: Props) => {
           style={{ backgroundColor: "white", color: colors.gray100 }}
           onClick={() => messagePraiseTrigger("praise", props.user.uid)}
         >
-          얘 칭찬
+          칭찬
         </p>
       )}
       {admin.current && !props.user.client ? (
