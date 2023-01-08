@@ -14,6 +14,7 @@ import {
 } from "../GlobalContext";
 
 import { User } from "../types";
+import { colors } from "../theme";
 
 interface Props {
   user: User;
@@ -51,6 +52,8 @@ const Controls = (props: Props) => {
       );
     props.setIsVideoPlay(true);
   };
+
+  const messagePraiseTrigger = (type: string) => {};
 
   const messageMaster = (type: string) => {
     console.log(type, props.user, client);
@@ -190,11 +193,22 @@ const Controls = (props: Props) => {
           <MdMonitor />
         </p>
       )}
-      {
-        <p onClick={() => messageVideoTrigger("praise")}>
-          <MdCleanHands />
+      {admin.current && props.user.client && (
+        <p
+          style={{ backgroundColor: "white", color: colors.gray100 }}
+          onClick={() => messageVideoTrigger("video-trigger")}
+        >
+          비디오 실행
         </p>
-      }
+      )}
+      {admin.current && !props.user.client && (
+        <p
+          style={{ backgroundColor: "white", color: colors.gray100 }}
+          onClick={() => messagePraiseTrigger("praise")}
+        >
+          얘 칭찬
+        </p>
+      )}
       {admin.current && !props.user.client ? (
         <p onClick={() => messageMaster("kick")}>Kick</p>
       ) : (
