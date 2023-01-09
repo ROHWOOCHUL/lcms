@@ -1,5 +1,4 @@
 // import AgoraRTC from "agora-rtc-sdk-ng";
-import "../index.css";
 
 import AgoraRTC, { UID } from "agora-rtc-react";
 import AgoraRTM, { RtmMessage } from "agora-rtm-sdk";
