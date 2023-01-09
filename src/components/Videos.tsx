@@ -67,16 +67,18 @@ const Videos = (props: Props) => {
       (user) => !user.username || user.username !== "anonymous"
     );
     if (!admin.current) {
-      const screenShareUser = users.find((user) => !user.username);
-
-      if (
-        screenShareUser &&
-        // 진짜 유저 길이에서 화면 공유를 위한 가상 유저가 포함되어 있는지 확인
-        users.filter((user) => user.username).length !== users.length
-      ) {
+      // 화면공유를 위한 강제 렌더링이 필요함
+      const screenShareUser = users.find(
+        (user) => !user.username || user.username === "anonymous"
+      );
+      if (screenShareUser) {
         props.setSharingScreen(true);
         vidDiv.current && playVideo(screenShareUser, vidDiv.current);
       }
+
+      // return () => {
+      //   vidDiv && stopVideo(screenShareUser, vidDiv.current);
+      // };
     }
   }, [users]);
 
@@ -99,11 +101,12 @@ const Videos = (props: Props) => {
           height:
             props.sharingScreen &&
             // 화면 공유 전용 유저가 있는지 확인
-            users.find((user) => !user.username)?.videoTrack
+            users.find(
+              (user) => !user.username || user.username === "anonymous"
+            )?.videoTrack
               ? "1000px"
               : "0px",
         }}
-        transition={{ delay: 0.5 }}
         ref={vidDiv}
       />
       <div
