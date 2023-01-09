@@ -15,6 +15,8 @@ import ChannelForm from "../components/ChannelForm";
 import { User } from "../types";
 import Videos from "../components/Videos";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const HodooClass = () => {
   //Store the User Data
@@ -27,7 +29,14 @@ const HodooClass = () => {
   const [isVideoPlay, setIsVideoPlay] = useState<boolean>(false);
   const [isPraiseTriggered, setIsPraiseTriggered] = useState<boolean>(false);
   const [targetUserUid, setTargetUserUid] = useState<UID>("");
-
+  const [searchParams, _] = useSearchParams();
+  const [appId, setAppId] = useState(searchParams.get("appId"));
+  const [channelName, setChannelName] = useState(
+    searchParams.get("channelName")
+  );
+  const [userName, setUseName] = useState(searchParams.get("userName"));
+  const [isAdmin, setIsAdmin] = useState(searchParams.get("isAdmin"));
+  const admin = useAdmin();
   const init = async (
     channelName: string,
     appId: string,
@@ -246,6 +255,13 @@ const HodooClass = () => {
     });
   };
 
+  useEffect(() => {
+    if (appId && channelName && userName && isAdmin) {
+      isAdmin === "true" ? (admin.current = true) : (admin.current = false);
+      init(channelName, appId, userName, admin.current);
+    }
+  }, []);
+
   return (
     <Section>
       <ContentWrapper>
@@ -262,7 +278,7 @@ const HodooClass = () => {
             setTargetUserUid={setTargetUserUid}
           />
         )}
-        {!start && <ChannelForm initFunc={init} />}
+        {/* {!start && <ChannelForm initFunc={init} />} */}
       </ContentWrapper>
     </Section>
   );
